@@ -1,35 +1,20 @@
 // Project: myBlackJack 
 // Created: Begining September 2021
 
-#constant MAX_WINDOW_SIZE_X		= 	1024
-#constant MAX_WINDOW_SIZE_Y		= 	768
+// declare and set Constants
 
-#constant MAX_DRAW_CARD_X_LENGH	= 	160
-#constant MAX_DRAW_CARD_Y_LENGH	= 	220
+SetConstant ()
 
-#constant MAX_DEPTH_CARD			= 	40
+// declare Varibale
+
+SetVariable () 
 
 // show all errors
 
 SetErrorMode(2)
 
-// set window properties
+SetWindowsDeviceProperty ()
 
-SetWindowTitle( "myBlackJack" )
-SetWindowSize( MAX_WINDOW_SIZE_X, MAX_WINDOW_SIZE_Y, 0 )
-SetWindowAllowResize( 1 ) // allow the user to resize the window
-
-// set display properties
-
-SetVirtualResolution( MAX_WINDOW_SIZE_X, MAX_WINDOW_SIZE_Y ) // doesn't have to match the window
-SetOrientationAllowed( 1, 1, 1, 1 ) // allow both portrait and landscape on mobile devices
-SetSyncRate( 30, 0 ) // 30fps instead of 60 to save battery
-SetScissor( 0,0,0,0 ) // use the maximum available screen space, no black borders
-UseNewDefaultFonts( 1 )
-
-// declare Varibale
-
-SetVariable () 
 
 // Variablen mit Werten zuweisen
 
@@ -38,7 +23,8 @@ YButton = ( MAX_WINDOW_SIZE_Y / 2 ) - ( MAX_DRAW_CARD_Y_LENGH / 2 ) + ( MAX_DRAW
 
 
 // global post = 30 as integer //[IDEGUIADD],integer,post
- 
+
+// Grafik-Daten laden
 
 backdrop0 	= LoadImage("blackjack/Blackjack-Cards_L.png")
 CoverSheet	= LoadImage("blackjack/Coversheet_L.png")
@@ -46,8 +32,12 @@ CoverSheet	= LoadImage("blackjack/Coversheet_L.png")
 CoverSheetCard = CreateSprite (CoverSheet)
 SetSpriteSize(CoverSheetCard, MAX_DRAW_CARD_X_LENGH/2, MAX_DRAW_CARD_Y_LENGH / 2 )
 
+// 52 Karten mischen und in einer Array eintragen
+
 ShuffleCards ()
+
 FillCardTable ()
+
 PutCardPosXY ()
 
 // SPR_CardsDeckFT[1] = CreateSprite (ID_CardsDeckFT[52])
@@ -75,25 +65,39 @@ SetPlayerCard ()
 
 MakeButton ()
 
+// --> Hauptprogramm -->
+
 do
 	
 	// If Pressed "exit"
 		
-	if GetVirtualButtonPressed(3)  
+	if GetVirtualButtonPressed(3) then end 
 	
-	end
-				
-	endif 
+	// If Pressed "draw"	(Wenn der Spieler eine weitere Karte zieht)
 	
-	// If Pressed "draw"	
+	if GetVirtualButtonPressed(1) then Player_Pressed_Draw ()
+		
 	
-	if GetVirtualButtonPressed(1)  
+    Sync ()
+    
+loop
+
+// <-- Hauptprogramm <--
+
+Function intern_debug ()
 		
-		// Message("You've Button 'draw' pressed")
+		Print ("BJ Cards")
+		Print ("Cards: " + str(CardsDeckRandom.length))
 		
-		// BackupNum		= 	XButton		
-		
-		DrawCardNum = DrawCardNum + 1
+		if GetSpriteExists(PlayerCardID) then Print("Card ID: " + str(PlayerCardID))
+		if GetSpriteExists(PlayerCardID) then Print("Depth: " + str(GetSpriteDepth(PlayerCardID)))
+
+	
+EndFunction
+
+Function Player_Pressed_Draw ()
+	
+	DrawCardNum = DrawCardNum + 1
 		
 		XButton_Move = 25
 		YButton_Move = 25
@@ -119,19 +123,10 @@ do
 		
 		// XButton	=	BackupNum
 		
-		endif
 	
-	Print ("BJ Cards")
-	Print ("Cards: " + str(CardsDeckRandom.length))
- 	    
-    if GetSpriteExists(PlayerCardID) then Print("Card ID: " + str(PlayerCardID))
-    if GetSpriteExists(PlayerCardID) then Print("Depth: " + str(GetSpriteDepth(PlayerCardID)))
+	EndFunction
 
-    Sync ()
-    
-loop
-
-function SetCPUCard ()
+Function SetCPUCard ()
 	
 	local XPosButton 			as integer 	=	0
 	local YPosButton 			as integer 	=	0
@@ -154,9 +149,9 @@ function SetCPUCard ()
 		
 	SetSpriteVisible(SecondsCardShow,0)
 	
-endfunction
+EndFunction
 
-function SetPlayerCard ()
+Function SetPlayerCard ()
 	
 	local FirstCardShow		as integer 	= 	0
 	local SecondCardShow		as integer	=	0
@@ -171,9 +166,9 @@ function SetPlayerCard ()
 	
 	
 	
-endfunction
+EndFunction
 
-function MakeButton ()
+Function MakeButton ()
 
 AddVirtualButton(1, XButton - 50, YButton + 175, 75)
 AddVirtualButton(2, XButton + 50, YButton + 175, 75)
@@ -185,7 +180,7 @@ SetVirtualButtonText(3,"Exit")
 
 
 
-endfunction
+EndFunction
 
 Function ShuffleCards ()
 	
@@ -372,9 +367,47 @@ for SLoopZaehler = 1 to SLoop
 	
 endfunction
 
+Function SetWindowsDeviceProperty ()
+	
+	// set window properties and display properties
+
+	SetWindowTitle( "myBlackJack" )
+	SetWindowSize( MAX_WINDOW_SIZE_X, MAX_WINDOW_SIZE_Y, 0 )
+	SetWindowAllowResize( 1 ) // allow the user to resize the window
+
+	// set  display properties
+
+	SetVirtualResolution( MAX_WINDOW_SIZE_X, MAX_WINDOW_SIZE_Y ) // doesn't have to match the window
+	SetOrientationAllowed( 1, 1, 1, 1 ) // allow both portrait and landscape on mobile devices
+	SetSyncRate( 30, 0 ) // 30fps instead of 60 to save battery
+	SetScissor( 0,0,0,0 ) // use the maximum available screen space, no black borders
+	UseNewDefaultFonts( 1 )
+
+	
+	EndFunction
+
+
+
+Function SetConstant ()
+	
+	#constant MAX_SCORE_CARD			=	21
+	
+	#constant MAX_WINDOW_SIZE_X		= 	1024
+	#constant MAX_WINDOW_SIZE_Y		= 	768
+
+	#constant MAX_DRAW_CARD_X_LENGH	= 	160
+	#constant MAX_DRAW_CARD_Y_LENGH	= 	220
+
+	#constant MAX_DEPTH_CARD			= 	40	
+	
+	EndFunction
+
 Function SetVariable ()
 	
 	#option_explicit
+	
+	global PlayerScore			as integer
+	global CPUScore				as integer
 	
 	global backdrop0 			as integer = 0
 	global ID_CardsDeckFT 		as integer[52]
