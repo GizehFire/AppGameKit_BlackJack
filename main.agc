@@ -1,6 +1,9 @@
 // Project: myBlackJack 
 // Created: Begining September 2021
 
+// #import_plugin MyNewPlugin
+
+
 // declare and set Constants
 
 SetConstant ()
@@ -163,6 +166,7 @@ Function SetPlayerCard ()
 	SecondCardShow	=	ViewAndSetCardXY ( PutFourCards[4],  XButton - 55, YButton - 20) 
 	GSetDepthCard	=	(MAX_DEPTH_CARD  - 	4 )
 	SetSpriteDepth ( SecondCardShow, GSetDepthCard )
+	
 	
 	
 	
