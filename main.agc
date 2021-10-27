@@ -80,12 +80,102 @@ do
 	
 	if GetVirtualButtonPressed(1) then Player_Pressed_Draw ()
 		
+	print ("Player: " + str(PlayerScore) )
 	
     Sync ()
     
 loop
 
 // <-- Hauptprogramm <--
+
+
+Function AddCard_V1 (CardNumber as integer)
+
+	select 1
+    
+
+    // -----------------------------------------------------///
+    // Checke Card 1 to 13
+
+	// Card As to 10
+	    
+    case (PutFourCards[CardNumber] >= 1 and PutFourCards[CardNumber] =< 10)
+    
+    PlayerScore = PlayerScore  + PutFourCards[CardNumber]
+    
+    endcase
+
+	// Card J to K
+
+
+    case (PutFourCards[CardNumber] >= 11 and PutFourCards[CardNumber] =< 13)
+    	
+    PlayerScore = PlayerScore  + CardTentASJackKing
+
+    endcase
+
+	// -----------------------------------------------------///
+	// Checke Card 14 to 27
+	// Card As to 10
+
+
+	case (PutFourCards[CardNumber] >= 14 and PutFourCards[CardNumber] =< 23)
+    	
+    PlayerScore = PlayerScore  +  ( PutFourCards[CardNumber] - 13)
+
+    endcase
+
+	// Card J to K
+   
+    case (PutFourCards[CardNumber] >= 24 and PutFourCards[CardNumber] =< 26)
+    	
+    PlayerScore = PlayerScore  +  CardTentASJackKing
+
+    endcase
+    
+    // -----------------------------------------------------///
+	// Checke Card 27 to 40
+	// Card As to 10
+
+
+	case (PutFourCards[CardNumber] >= 27 and PutFourCards[CardNumber] =< 36)
+    	
+    PlayerScore = PlayerScore  +  ( PutFourCards[CardNumber] - 26)	
+
+    endcase
+
+	// Card J to K
+   
+    case (PutFourCards[CardNumber] >= 37 and PutFourCards[2] =< 39)
+    	
+    PlayerScore = PlayerScore  +  CardTentASJackKing
+
+    endcase
+    
+     // -----------------------------------------------------///
+	// Checke Card 41 to 54
+	// Card As to 10
+
+
+	case (PutFourCards[CardNumber] >= 40 and PutFourCards[2] =< 49)
+    	
+    
+    PlayerScore = PlayerScore  +  ( PutFourCards[CardNumber] - 39)	
+
+    endcase
+
+	// Card J to K
+   
+    case (PutFourCards[CardNumber] >= 50 and PutFourCards[2] =< 52)
+    	
+    PlayerScore = PlayerScore  +  CardTentASJackKing
+
+    endcase
+    
+            
+endselect
+
+EndFunction
 
 Function intern_debug ()
 		
@@ -155,7 +245,7 @@ Function SetCPUCard ()
 EndFunction
 
 Function SetPlayerCard ()
-	
+		
 	local FirstCardShow		as integer 	= 	0
 	local SecondCardShow		as integer	=	0
 
@@ -166,10 +256,14 @@ Function SetPlayerCard ()
 	SecondCardShow	=	ViewAndSetCardXY ( PutFourCards[4],  XButton - 55, YButton - 20) 
 	GSetDepthCard	=	(MAX_DEPTH_CARD  - 	4 )
 	SetSpriteDepth ( SecondCardShow, GSetDepthCard )
-	
-	
-	
-	
+		
+//	PutFourCards[2]
+//	PutFourCards[4]
+
+
+	AddCard_V1 (2)
+	AddCard_V1 (4)
+
 EndFunction
 
 Function MakeButton ()
@@ -181,8 +275,6 @@ AddVirtualButton(3, MAX_WINDOW_SIZE_X-80, MAX_WINDOW_SIZE_Y-80, 75)
 SetVirtualButtonText(1,"Ziehen")
 SetVirtualButtonText(2,"Halten")
 SetVirtualButtonText(3,"Exit")
-
-
 
 EndFunction
 
@@ -394,6 +486,8 @@ Function SetWindowsDeviceProperty ()
 
 Function SetConstant ()
 	
+	#constant CardTentASJackKing		= 	10
+	
 	#constant MAX_SCORE_CARD			=	21
 	
 	#constant MAX_WINDOW_SIZE_X		= 	1024
@@ -403,14 +497,14 @@ Function SetConstant ()
 	#constant MAX_DRAW_CARD_Y_LENGH	= 	220
 
 	#constant MAX_DEPTH_CARD			= 	40	
-	
+		
 	EndFunction
 
 Function SetVariable ()
 	
 	#option_explicit
 	
-	global PlayerScore			as integer
+	global PlayerScore			as integer = 0
 	global CPUScore				as integer
 	
 	global backdrop0 			as integer = 0

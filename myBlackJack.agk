@@ -51,10 +51,11 @@ output_path=
 FILE_0=main.agc;-1
 
 [files]
-FILE_NAME_0=1;main.agc;3;0
+FILE_NAME_0=1;main.agc;91;0
 
 [watchvariables]
 watch_variable=@Version;
+watch_variable=CardNumber;
 watch_variable=CardsDeckRandom;
 watch_variable=GSetDepthCard;
 watch_variable=PutFourCards;
