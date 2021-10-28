@@ -71,6 +71,14 @@ MakeButton ()
 // --> Hauptprogramm -->
 
 do
+
+// if CardsDeckRandom.length = 0
+	
+//	Message ("Keine Karten mehr ;). Programm Ende.")
+	
+//	end
+		
+//  endif
 	
 	// If Pressed "exit"
 		
@@ -79,10 +87,30 @@ do
 	// If Pressed "draw"	(Wenn der Spieler eine weitere Karte zieht)
 	
 	if GetVirtualButtonPressed(1) then Player_Pressed_Draw ()
-		
-	print ("Player: " + str(PlayerScore) )
 	
-    Sync ()
+	// If Pressed "New Card"	(Wenn der Spieler eine neuen Karte möchte)
+	
+	if GetVirtualButtonPressed(4) 
+	
+	PlayerScore = 0
+	
+	NewCardDeck[0] = 1 // Schalter
+	
+	// if CardsDeckRandom [1]
+	
+	PutFourCards [2] = CardsDeckRandom [1]
+ 	CardsDeckRandom.remove(1)
+ 	
+ 	PutFourCards [4] = CardsDeckRandom [1]
+ 	CardsDeckRandom.remove(1)
+ 	
+ 	SetPlayerCard ()
+ 	
+	endif
+	
+	intern_debug ()
+			
+	Sync ()
     
 loop
 
@@ -90,7 +118,7 @@ loop
 
 
 Function AddCard_V1 (CardNumber as integer)
-
+	
 	select 1
     
 
@@ -111,6 +139,8 @@ Function AddCard_V1 (CardNumber as integer)
     case (PutFourCards[CardNumber] >= 11 and PutFourCards[CardNumber] =< 13)
     	
     PlayerScore = PlayerScore  + CardTentASJackKing
+    
+    // PlayerScore = PlayerScore + PutFourCards[CardNumber]
 
     endcase
 
@@ -146,7 +176,7 @@ Function AddCard_V1 (CardNumber as integer)
 
 	// Card J to K
    
-    case (PutFourCards[CardNumber] >= 37 and PutFourCards[2] =< 39)
+    case (PutFourCards[CardNumber] >= 37 and (PutFourCards[CardNumber]) =< 39)
     	
     PlayerScore = PlayerScore  +  CardTentASJackKing
 
@@ -157,7 +187,7 @@ Function AddCard_V1 (CardNumber as integer)
 	// Card As to 10
 
 
-	case (PutFourCards[CardNumber] >= 40 and PutFourCards[2] =< 49)
+	case (PutFourCards[CardNumber] >= 40 and (PutFourCards[CardNumber]) =< 49)
     	
     
     PlayerScore = PlayerScore  +  ( PutFourCards[CardNumber] - 39)	
@@ -166,24 +196,27 @@ Function AddCard_V1 (CardNumber as integer)
 
 	// Card J to K
    
-    case (PutFourCards[CardNumber] >= 50 and PutFourCards[2] =< 52)
+    case (PutFourCards[CardNumber] >= 50 and (PutFourCards[CardNumber]) =< 52)
     	
     PlayerScore = PlayerScore  +  CardTentASJackKing
 
     endcase
     
             
-endselect
+endselect 
 
 EndFunction
 
+
 Function intern_debug ()
 		
-		Print ("BJ Cards")
-		Print ("Cards: " + str(CardsDeckRandom.length))
 		
-		if GetSpriteExists(PlayerCardID) then Print("Card ID: " + str(PlayerCardID))
-		if GetSpriteExists(PlayerCardID) then Print("Depth: " + str(GetSpriteDepth(PlayerCardID)))
+		Print ("BJ Cards")
+		Print ("Player: " + str ( PlayerScore ) )
+		Print ("Cards Count: " + str( CardsDeckRandom.length ))
+		
+		if GetSpriteExists(PlayerCardID) then Print("Card ID: " + str( PlayerCardID ))
+		if GetSpriteExists(PlayerCardID) then Print("Depth: " + str ( GetSpriteDepth( PlayerCardID ) ))
 
 	
 EndFunction
@@ -239,7 +272,6 @@ Function SetCPUCard ()
 		
 	SetSpritePosition(CoverSheetCard, XPosButton, YPosButton - 275 )
 	SetSpriteDepth ( CoverSheetCard, MAX_DEPTH_CARD )
-		
 	SetSpriteVisible(SecondsCardShow,0)
 	
 EndFunction
@@ -248,18 +280,37 @@ Function SetPlayerCard ()
 		
 	local FirstCardShow		as integer 	= 	0
 	local SecondCardShow		as integer	=	0
-
-	FirstCardShow		=	ViewAndSetCardXY ( PutFourCards[2],  XButton - 85, YButton) 
+		
+		// Falls der Spieler neue Kartendeck gewählt hat,
+		// die bisherigen Kartendeck verstecken.
+		// Sonst werden die neuen Karten von den alten überdeckt,
+		// so, daß man die neuen gewählten Karten nicht sehen kann
+		
+		if NewCardDeck[0] = 1  // falls neue Kartendeck Button gedrückt wurde
+			
+			SetSpriteVisible(NewCardDeck[1],0)
+			SetSpriteVisible(NewCardDeck[2],0)
+			
+		endif
+	
+	FirstCardShow		=	ViewAndSetCardXY ( PutFourCards[2],  XButton - 85, YButton) 	
 	GSetDepthCard		=	( MAX_DEPTH_CARD  - 	3 )
 	SetSpriteDepth ( FirstCardShow, GSetDepthCard )
 	
 	SecondCardShow	=	ViewAndSetCardXY ( PutFourCards[4],  XButton - 55, YButton - 20) 
 	GSetDepthCard	=	(MAX_DEPTH_CARD  - 	4 )
 	SetSpriteDepth ( SecondCardShow, GSetDepthCard )
-		
-//	PutFourCards[2]
-//	PutFourCards[4]
-
+	
+	
+	// Kontrollflags für Button "neue Kartendeck"
+	// als nicht gedrückt setzen
+	
+	NewCardDeck[0] = 0 
+	
+	// Die beiden Kartendeck für Spieler merken
+	
+	NewCardDeck[2] = SecondCardShow
+	NewCardDeck[1] = FirstCardShow
 
 	AddCard_V1 (2)
 	AddCard_V1 (4)
@@ -271,10 +322,13 @@ Function MakeButton ()
 AddVirtualButton(1, XButton - 50, YButton + 175, 75)
 AddVirtualButton(2, XButton + 50, YButton + 175, 75)
 AddVirtualButton(3, MAX_WINDOW_SIZE_X-80, MAX_WINDOW_SIZE_Y-80, 75)
+AddVirtualButton(4, XButton, YButton + 250, 0)
+SetVirtualButtonSize(4, 150,50)
 
 SetVirtualButtonText(1,"Ziehen")
 SetVirtualButtonText(2,"Halten")
 SetVirtualButtonText(3,"Exit")
+SetVirtualButtonText(4,"Neue Karten")
 
 EndFunction
 
@@ -504,7 +558,15 @@ Function SetVariable ()
 	
 	#option_explicit
 	
+	// Kontrollflags für Button "Neuen Kartendeck für Player"
+	
+	global NewCardDeck			as integer[3] = [0,0,0]
+	
 	global PlayerScore			as integer = 0
+	
+	global D1PlayerScore			as integer = 0
+	global D2PlayerScore			as integer = 0
+	
 	global CPUScore				as integer
 	
 	global backdrop0 			as integer = 0
