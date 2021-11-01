@@ -21,11 +21,8 @@ SetWindowsDeviceProperty ()
 
 // Variablen mit Werten zuweisen
 
-XButton = ( MAX_WINDOW_SIZE_X / 2 ) - ( MAX_DRAW_CARD_X_LENGH / 2 ) + ( MAX_DRAW_CARD_X_LENGH / 2 )
-YButton = ( MAX_WINDOW_SIZE_Y / 2 ) - ( MAX_DRAW_CARD_Y_LENGH / 2 ) + ( MAX_DRAW_CARD_Y_LENGH / 2 )
-
-
-// global post = 30 as integer //[IDEGUIADD],integer,post
+XButton = ( MAX_WINDOW_SIZE_X / 2 ) - ( MAX_DRAW_CARD_X_LENGH / 2 ) + ( MAX_DRAW_CARD_X_LENGH / 2 ) 
+YButton = ( MAX_WINDOW_SIZE_Y / 2 ) - ( MAX_DRAW_CARD_Y_LENGH / 2 ) + ( MAX_DRAW_CARD_Y_LENGH / 2 ) 
 
 // Grafik-Daten laden
 
@@ -80,6 +77,19 @@ do
 		
 //  endif
 	
+
+	
+	if GMaxCard =< 1
+		
+		SetVirtualButtonActive(4,0)	
+		SetVirtualButtonVisible(4,0)
+		SetVirtualButtonActive(1,0)	
+		SetVirtualButtonVisible(1,0)
+		
+	endif
+	
+	
+	
 	// If Pressed "exit"
 		
 	if GetVirtualButtonPressed(3) then end 
@@ -91,20 +101,19 @@ do
 	// If Pressed "New Card"	(Wenn der Spieler eine neuen Karte möchte)
 	
 	if GetVirtualButtonPressed(4) 
-	
-	PlayerScore = 0
-	
-	NewCardDeck[0] = 1 // Schalter
-	
-	// if CardsDeckRandom [1]
-	
-	PutFourCards [2] = CardsDeckRandom [1]
- 	CardsDeckRandom.remove(1)
- 	
- 	PutFourCards [4] = CardsDeckRandom [1]
- 	CardsDeckRandom.remove(1)
- 	
- 	SetPlayerCard ()
+		
+			PlayerScore = 0
+			NewCardDeck[0] = 1 // Schalter
+		
+			// if CardsDeckRandom [1]
+			
+			PutFourCards [2] = CardsDeckRandom [1]
+			CardsDeckRandom.remove(1)
+			
+			PutFourCards [4] = CardsDeckRandom [1]
+			CardsDeckRandom.remove(1)
+			
+			SetPlayerCard ()
  	
 	endif
 	
@@ -182,8 +191,8 @@ Function AddCard_V1 (CardNumber as integer)
 
     endcase
     
-     // -----------------------------------------------------///
-	// Checke Card 41 to 54
+    // -----------------------------------------------------///
+    // Checke Card 41 to 54
 	// Card As to 10
 
 
@@ -213,7 +222,8 @@ Function intern_debug ()
 		
 		Print ("BJ Cards")
 		Print ("Player: " + str ( PlayerScore ) )
-		Print ("Cards Count: " + str( CardsDeckRandom.length ))
+		Print ("Cards Count: " + str( CardsDeckRandom.length ))		
+		Print ("Cards Count v2: " +str(GMaxCard))
 		
 		if GetSpriteExists(PlayerCardID) then Print("Card ID: " + str( PlayerCardID ))
 		if GetSpriteExists(PlayerCardID) then Print("Depth: " + str ( GetSpriteDepth( PlayerCardID ) ))
@@ -223,32 +233,89 @@ EndFunction
 
 Function Player_Pressed_Draw ()
 	
+	local lXMove				as	integer	= 0
+	local lYMove				as	integer	= 0
+	
+			
 	DrawCardNum = DrawCardNum + 1
-		
-		XButton_Move = 25
-		YButton_Move = 25
+	
+	if ( column_enable	=	0 )
+			
+			XButton_Move = 25
+			YButton_Move = 25
 				
-		if DrawCardNum = 1
+				if DrawCardNum = 1
 		
-		XButton = XButton - 55
-		YButton = YButton - 20
-						
-			endif
-				
+					XButton = XButton - 50
+					YButton = YButton - 15
+					
+				endif						
+
 		XButton_Move = DrawCardNum * XButton_Move
 		YButton_Move = DrawCardNum * YButton_Move
+		
+	endif
+	
+	
+	if (column_enable = 1)
+		
+	XButton = XButton + 25
+	YButton = YButton - 25
+	
+	Max_DrawCardNum = Max_DrawCardNum + 1
+		
+	
+	endif	
+	
+	
+	if (DrawCardNum) => 4 and (column_enable = 0)
+		
+		// * * * * * * * //
+		
+		// Bildschirmrand erreicht?			
+			
+			YButton = YButton + 20
+			XButton = XButton + 50
+			
+			YButton_Move 	=	0
+			XButton_Move		= 	0		
 				
-		PutFourCards [1] = CardsDeckRandom [1]
-		CardsDeckRandom.remove(1)
+		// * * * * * * * //
 		
-		PlayerCardID = ViewAndSetCardXY ( PutFourCards[1],  (XButton + XButton_Move), (YButton - YButton_Move)) 
+		column_enable = 1
 		
-		GSetDepthCard = GSetDepthCard - 1
+		Push_DrawCardNum = DrawCardNum
+			
+			
+	endif
+	
 		
-		SetSpriteDepth(PlayerCardID,GSetDepthCard)
+	if (column_enable = 1) and (Push_DrawCardNum < Max_DrawCardNum)
 		
-		// XButton	=	BackupNum
+	Max_DrawCardNum = 0
 		
+	XButton = XButton - (10*(Push_DrawCardNum+1))
+	YButton = YButton + (25*(Push_DrawCardNum+1))
+			
+	YButton_Move 	=	0
+	XButton_Move		= 	0		
+	
+	endif
+	
+
+	
+																					
+	PutFourCards [1] = CardsDeckRandom [1]
+	CardsDeckRandom.remove(1)
+		
+	PlayerCardID = ViewAndSetCardXY ( PutFourCards[1],  (XButton + XButton_Move), (YButton - YButton_Move)) 
+		
+	GSetDepthCard = GSetDepthCard - 1
+		
+	SetSpriteDepth(PlayerCardID,GSetDepthCard)
+		
+		
+	GMaxCard = GMaxCard - 1		
 	
 	EndFunction
 
@@ -259,8 +326,8 @@ Function SetCPUCard ()
 	local FirstCardShow			as integer 	= 	0
 	local CoverSheetCardShow		as integer	=	0
 	
-	XPosButton = ( MAX_WINDOW_SIZE_X / 2 ) - ( MAX_DRAW_CARD_X_LENGH / 2 ) + (MAX_DRAW_CARD_X_LENGH / 2 )
-	YPosButton = ( MAX_WINDOW_SIZE_Y / 2 ) - ( MAX_DRAW_CARD_Y_LENGH / 2 ) + (MAX_DRAW_CARD_Y_LENGH / 2 )
+	XPosButton = ( MAX_WINDOW_SIZE_X / 2 ) - (MAX_DRAW_CARD_X_LENGH / 2 ) + (MAX_DRAW_CARD_X_LENGH / 2 )
+	YPosButton = ( MAX_WINDOW_SIZE_Y / 2 ) - (MAX_DRAW_CARD_Y_LENGH / 2 ) + (MAX_DRAW_CARD_Y_LENGH / 2 )
 	
 	FirstCardShow	= 	ViewAndSetCardXY ( PutFourCards[1],  XPosButton - 85, YPosButton - 275) 
 	SetSpriteDepth ( FirstCardShow, GSetDepthCard )
@@ -273,6 +340,10 @@ Function SetCPUCard ()
 	SetSpritePosition(CoverSheetCard, XPosButton, YPosButton - 275 )
 	SetSpriteDepth ( CoverSheetCard, MAX_DEPTH_CARD )
 	SetSpriteVisible(SecondsCardShow,0)
+	
+	// Kartenzaehler zwei Abziehen
+	
+	GMaxCard = GMaxCard - 2 
 	
 EndFunction
 
@@ -314,6 +385,10 @@ Function SetPlayerCard ()
 
 	AddCard_V1 (2)
 	AddCard_V1 (4)
+	
+	// Kartenzaehler zwei Abziehen
+	
+	GMaxCard = GMaxCard - 2
 
 EndFunction
 
@@ -536,7 +611,11 @@ Function SetWindowsDeviceProperty ()
 	
 	EndFunction
 
+Function NULL ()
+	
+	
 
+EndFunction
 
 Function SetConstant ()
 	
@@ -550,7 +629,7 @@ Function SetConstant ()
 	#constant MAX_DRAW_CARD_X_LENGH	= 	160
 	#constant MAX_DRAW_CARD_Y_LENGH	= 	220
 
-	#constant MAX_DEPTH_CARD			= 	40	
+	#constant MAX_DEPTH_CARD			= 	52	
 		
 	EndFunction
 
@@ -564,15 +643,14 @@ Function SetVariable ()
 	
 	global PlayerScore			as integer = 0
 	
-	global D1PlayerScore			as integer = 0
-	global D2PlayerScore			as integer = 0
+	global GMaxCard				as integer = 52
 	
 	global CPUScore				as integer
 	
 	global backdrop0 			as integer = 0
 	global ID_CardsDeckFT 		as integer[52]
 	global SPR_CardsDeckFT 		as integer[52]
-	global CardsDeckRandom 		as integer[52]
+	global CardsDeckRandom 		as integer[54]
 	
 	global CardsDeckFT 			as integer[17]
 	global CardsDeckX 			as integer[12]
@@ -587,12 +665,13 @@ Function SetVariable ()
 		
 	global PutFourCards 			as integer[4]
 	global SecondsCardShow 		as integer 	= 0
-	global DeckButtonBoolean 	as integer 	= 1
-	
+		
 	global XButton 				as integer
 	global YButton 				as integer
 	
 	global DrawCardNum			as	integer	=	0
+	global Push_DrawCardNum		as 	integer	=	0
+	
 	global BackupNum				as	integer	=	0
 	
 	global XButton_Move			as	integer	=	0
@@ -600,6 +679,13 @@ Function SetVariable ()
 	
 	global PlayerCardID			as	integer	=	0
 	global GSetDepthCard			as	integer	=	MAX_DEPTH_CARD
+	
+	global Max_DrawCardNum 		as 	integer = 0
+	
+	// Boolean - Werte
+	
+	global column_enable			as	integer 	= 	0
+	global DeckButtonBoolean 	as 	integer 	= 	1
 
 	
 endfunction
