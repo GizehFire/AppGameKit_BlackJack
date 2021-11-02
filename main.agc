@@ -4,7 +4,12 @@
 // #import_plugin MyNewPlugin
 
 
+// Use and Choose the OpenGL renderer
+
+#renderer "Basic"
+
 // declare and set Constants
+
 
 SetConstant ()
 
@@ -21,8 +26,7 @@ SetWindowsDeviceProperty ()
 
 // Variablen mit Werten zuweisen
 
-XButton = ( MAX_WINDOW_SIZE_X / 2 ) - ( MAX_DRAW_CARD_X_LENGH / 2 ) + ( MAX_DRAW_CARD_X_LENGH / 2 ) 
-YButton = ( MAX_WINDOW_SIZE_Y / 2 ) - ( MAX_DRAW_CARD_Y_LENGH / 2 ) + ( MAX_DRAW_CARD_Y_LENGH / 2 ) 
+SetCardReset()
 
 // Grafik-Daten laden
 
@@ -65,42 +69,62 @@ SetPlayerCard ()
 
 MakeButton ()
 
+// Button "Neue Karten" deaktivieren (Das dient zu Testzwecken [Debug])
+
+SetVirtualButtonVisible (BUTTON_NEW_CARD, 0)
+SetVirtualButtonActive (BUTTON_NEW_CARD, 0)
+
+
 // --> Hauptprogramm -->
+
 
 do
 
-// if CardsDeckRandom.length = 0
-	
-//	Message ("Keine Karten mehr ;). Programm Ende.")
-	
-//	end
+	if PlayerScore > MAX_SCORE_CARD and CardGameOver = 0
 		
-//  endif
+		Message (" BUST: Over 21 Lose. Your Card: [ " + str (PlayerScore) + " ]")		
+		SetVirtualButtonVisible (BUTTON_DRAW, 0)
+		SetVirtualButtonActive (BUTTON_DRAW, 0)
+		
+		SetVirtualButtonVisible (BUTTON_HOLD, 0)
+		SetVirtualButtonActive (BUTTON_HOLD, 0)
+		
+		CardGameOver = 1
+		
+		endif
 	
-
 	
 	if GMaxCard =< 1
 		
-		SetVirtualButtonActive(4,0)	
-		SetVirtualButtonVisible(4,0)
-		SetVirtualButtonActive(1,0)	
-		SetVirtualButtonVisible(1,0)
+		SetVirtualButtonActive(BUTTON_NEW_CARD,0)	
+		SetVirtualButtonVisible(BUTTON_NEW_CARD,0)
+		SetVirtualButtonActive(BUTTON_DRAW,0)	
+		SetVirtualButtonVisible(BUTTON_DRAW,0)
 		
 	endif
-	
-	
-	
+		
 	// If Pressed "exit"
 		
-	if GetVirtualButtonPressed(3) then end 
+	if GetVirtualButtonPressed(BUTTON_EXIT) then end 
 	
 	// If Pressed "draw"	(Wenn der Spieler eine weitere Karte zieht)
 	
-	if GetVirtualButtonPressed(1) then Player_Pressed_Draw ()
+	if GetVirtualButtonPressed(BUTTON_DRAW) 
+	
+	// "New Card" Button deaktivieren	
+		
+		SetVirtualButtonVisible (BUTTON_NEW_CARD, 0)
+		SetVirtualButtonActive (BUTTON_NEW_CARD, 0)
+
+	// Weitere Karten ziehen	
+	
+		Player_Pressed_Draw_V2 ()
+	
+	endif
 	
 	// If Pressed "New Card"	(Wenn der Spieler eine neuen Karte möchte)
 	
-	if GetVirtualButtonPressed(4) 
+	if GetVirtualButtonPressed(BUTTON_NEW_CARD) 
 		
 			PlayerScore = 0
 			NewCardDeck[0] = 1 // Schalter
@@ -125,6 +149,13 @@ loop
 
 // <-- Hauptprogramm <--
 
+
+Function SetCardReset()
+
+XButton = ( MAX_WINDOW_SIZE_X / 2 ) - ( MAX_DRAW_CARD_X_LENGH / 2 ) + ( MAX_DRAW_CARD_X_LENGH / 2 ) 
+YButton = ( MAX_WINDOW_SIZE_Y / 2 ) - ( MAX_DRAW_CARD_Y_LENGH / 2 ) + ( MAX_DRAW_CARD_Y_LENGH / 2 ) 
+
+EndFunction
 
 Function AddCard_V1 (CardNumber as integer)
 	
@@ -220,104 +251,85 @@ EndFunction
 Function intern_debug ()
 		
 		
-		Print ("BJ Cards")
-		Print ("Player: " + str ( PlayerScore ) )
-		Print ("Cards Count: " + str( CardsDeckRandom.length ))		
-		Print ("Cards Count v2: " +str(GMaxCard))
+		Print ("BJ Cards - myBlackJack")
+		Print ("Score: " + str ( PlayerScore ) )
+		// Print ("Cards Count: " + str( CardsDeckRandom.length ))		
+		Print ("Cards Count: " +str(52 - GMaxCard))
 		
-		if GetSpriteExists(PlayerCardID) then Print("Card ID: " + str( PlayerCardID ))
-		if GetSpriteExists(PlayerCardID) then Print("Depth: " + str ( GetSpriteDepth( PlayerCardID ) ))
+		// if GetSpriteExists(PlayerCardID) then Print("Card ID: " + str(PlayerCardID ))
+		// if GetSpriteExists(PlayerCardID) then Print("Depth: " + str ( GetSpriteDepth( PlayerCardID ) ))
 
 	
 EndFunction
-
-Function Player_Pressed_Draw ()
 	
-	local lXMove				as	integer	= 0
-	local lYMove				as	integer	= 0
 	
-			
-	DrawCardNum = DrawCardNum + 1
+	Function Player_Pressed_Draw_V2 ()
 	
-	if ( column_enable	=	0 )
-			
-			XButton_Move = 25
-			YButton_Move = 25
+		local Counter as integer = 0	
+	
+	if DrawCardNum > (MAX_SHOW_DRAW_CARD-1)
+		
+		Column_Enable = 1
+		
+		YButton_Move = 0
+		XButton_Move = 0
+		DrawCardNum = 0
+		
+		SetCardReset()
+		
+		XButton = XButton - FIRSTCARDPOSX
+		
 				
-				if DrawCardNum = 1
+	for Counter = 1 to MAX_SHOW_DRAW_CARD
+	
+		SetSpriteVisible(SavePlayerDrawCardID[(SPlayDrawCdIDCounter-Counter)+1],0)
 		
-					XButton = XButton - 50
-					YButton = YButton - 15
-					
-				endif						
+		SetSpriteVisible(NewCardDeck[1], 0)
+		SetSpriteVisible(NewCardDeck[2], 0)
+		
+	next Counter
+		
+	
+	endif
+	
+	inc DrawCardNum
+	inc SPlayDrawCdIDCounter
+	
+	
+	if DrawCardNum = 1 
+		
+		if Column_Enable = 0
+		
+			YButton_Move = (SECCARDPOSY*2)
+		
+		endif
+			
+	else
+	
+		YButton_Move = YButton_Move + SECCARDPOSY
+		XButton_Move = XButton_Move + SECCARDPOSX
+	
+	endif
 
-		XButton_Move = DrawCardNum * XButton_Move
-		YButton_Move = DrawCardNum * YButton_Move
-		
-	endif
-	
-	
-	if (column_enable = 1)
-		
-	XButton = XButton + 25
-	YButton = YButton - 25
-	
-	Max_DrawCardNum = Max_DrawCardNum + 1
-		
-	
-	endif	
-	
-	
-	if (DrawCardNum) => 4 and (column_enable = 0)
-		
-		// * * * * * * * //
-		
-		// Bildschirmrand erreicht?			
-			
-			YButton = YButton + 20
-			XButton = XButton + 50
-			
-			YButton_Move 	=	0
-			XButton_Move		= 	0		
-				
-		// * * * * * * * //
-		
-		column_enable = 1
-		
-		Push_DrawCardNum = DrawCardNum
-			
-			
-	endif
-	
-		
-	if (column_enable = 1) and (Push_DrawCardNum < Max_DrawCardNum)
-		
-	Max_DrawCardNum = 0
-		
-	XButton = XButton - (10*(Push_DrawCardNum+1))
-	YButton = YButton + (25*(Push_DrawCardNum+1))
-			
-	YButton_Move 	=	0
-	XButton_Move		= 	0		
-	
-	endif
-	
-
-	
-																					
+																																																																																																																																						
 	PutFourCards [1] = CardsDeckRandom [1]
 	CardsDeckRandom.remove(1)
 		
-	PlayerCardID = ViewAndSetCardXY ( PutFourCards[1],  (XButton + XButton_Move), (YButton - YButton_Move)) 
-		
+	PlayerCardID = ViewAndSetCardXY ( PutFourCards[1],  (XButton + XButton_Move), (YButton - YButton_Move))	
+	SavePlayerDrawCardID [SPlayDrawCdIDCounter] = PlayerCardID
+			
+	
 	GSetDepthCard = GSetDepthCard - 1
 		
 	SetSpriteDepth(PlayerCardID,GSetDepthCard)
 		
+	
+	AddCard_V1 (1)
 		
 	GMaxCard = GMaxCard - 1		
 	
 	EndFunction
+
 
 Function SetCPUCard ()
 	
@@ -351,6 +363,8 @@ Function SetPlayerCard ()
 		
 	local FirstCardShow		as integer 	= 	0
 	local SecondCardShow		as integer	=	0
+	
+	SetCardReset()
 		
 		// Falls der Spieler neue Kartendeck gewählt hat,
 		// die bisherigen Kartendeck verstecken.
@@ -364,15 +378,14 @@ Function SetPlayerCard ()
 			
 		endif
 	
-	FirstCardShow		=	ViewAndSetCardXY ( PutFourCards[2],  XButton - 85, YButton) 	
+	FirstCardShow		=	ViewAndSetCardXY ( PutFourCards[2],  XButton-FIRSTCARDPOSX, YButton) 	
 	GSetDepthCard		=	( MAX_DEPTH_CARD  - 	3 )
 	SetSpriteDepth ( FirstCardShow, GSetDepthCard )
 	
-	SecondCardShow	=	ViewAndSetCardXY ( PutFourCards[4],  XButton - 55, YButton - 20) 
-	GSetDepthCard	=	(MAX_DEPTH_CARD  - 	4 )
+	SecondCardShow		=	ViewAndSetCardXY ( PutFourCards[4],  XButton-SECCARDPOSX, YButton - SECCARDPOSY) 
+	GSetDepthCard		=	(MAX_DEPTH_CARD  - 	4 )
 	SetSpriteDepth ( SecondCardShow, GSetDepthCard )
-	
-	
+			
 	// Kontrollflags für Button "neue Kartendeck"
 	// als nicht gedrückt setzen
 	
@@ -394,16 +407,20 @@ EndFunction
 
 Function MakeButton ()
 
-AddVirtualButton(1, XButton - 50, YButton + 175, 75)
-AddVirtualButton(2, XButton + 50, YButton + 175, 75)
-AddVirtualButton(3, MAX_WINDOW_SIZE_X-80, MAX_WINDOW_SIZE_Y-80, 75)
-AddVirtualButton(4, XButton, YButton + 250, 0)
-SetVirtualButtonSize(4, 150,50)
+AddVirtualButton(BUTTON_DRAW, XButton - 50, YButton + 175, 75)
+AddVirtualButton(BUTTON_HOLD, XButton + 50, YButton + 175, 75)
+AddVirtualButton(BUTTON_EXIT, MAX_WINDOW_SIZE_X-80, MAX_WINDOW_SIZE_Y-80, 75)
+AddVirtualButton(BUTTON_NEW_CARD, XButton, YButton + 250, 0)
+SetVirtualButtonSize(BUTTON_NEW_CARD, 150,50)
 
-SetVirtualButtonText(1,"Ziehen")
-SetVirtualButtonText(2,"Halten")
-SetVirtualButtonText(3,"Exit")
-SetVirtualButtonText(4,"Neue Karten")
+AddVirtualButton(BUTTON_NEW_GAME, XButton, YButton + 325, 0)
+SetVirtualButtonSize(BUTTON_NEW_GAME, 150,50)
+
+SetVirtualButtonText(BUTTON_DRAW,"Ziehen")
+SetVirtualButtonText(BUTTON_HOLD,"Halten")
+SetVirtualButtonText(BUTTON_EXIT,"Exit")
+SetVirtualButtonText(BUTTON_NEW_CARD,"Neue Karten")
+SetVirtualButtonText(BUTTON_NEW_GAME,"Neues Spiel")
 
 EndFunction
 
@@ -618,6 +635,17 @@ Function NULL ()
 EndFunction
 
 Function SetConstant ()
+
+			
+	#constant BUTTON_DRAW			=	1
+	#constant BUTTON_HOLD			=	2
+	#constant BUTTON_EXIT			=	3
+	#constant BUTTON_NEW_CARD		=	4
+	#constant BUTTON_NEW_GAME		=	5
+	
+	
+	
+	#constant MAX_SHOW_DRAW_CARD		=	4
 	
 	#constant CardTentASJackKing		= 	10
 	
@@ -630,7 +658,11 @@ Function SetConstant ()
 	#constant MAX_DRAW_CARD_Y_LENGH	= 	220
 
 	#constant MAX_DEPTH_CARD			= 	52	
-		
+	
+	#constant FIRSTCARDPOSX			=   50
+	#constant SECCARDPOSX			=   25
+	#constant SECCARDPOSY			=   20
+			
 	EndFunction
 
 Function SetVariable ()
@@ -638,6 +670,11 @@ Function SetVariable ()
 	#option_explicit
 	
 	// Kontrollflags für Button "Neuen Kartendeck für Player"
+	
+	global CardGameOver 			as integer = 0
+		
+	global SPlayDrawCdIDCounter	as integer = 0
+	global SavePlayerDrawCardID	as integer[53]
 	
 	global NewCardDeck			as integer[3] = [0,0,0]
 	
@@ -684,7 +721,7 @@ Function SetVariable ()
 	
 	// Boolean - Werte
 	
-	global column_enable			as	integer 	= 	0
+	global Column_Enable			as	integer 	= 	0
 	global DeckButtonBoolean 	as 	integer 	= 	1
 
 	
