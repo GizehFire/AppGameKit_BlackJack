@@ -51,10 +51,11 @@ output_path=
 FILE_0=main.agc;-1
 
 [files]
-FILE_NAME_0=1;main.agc;131;0
+FILE_NAME_0=1;main.agc;136;0
 
 [watchvariables]
 watch_variable=@Version;
+watch_variable=CardsDeckRandom;
 watch_variable=DrawCardNum;
 watch_variable=SavePlayerDrawCardID;
 watch_variable=XButton;

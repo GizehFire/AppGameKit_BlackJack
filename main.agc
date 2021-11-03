@@ -1,9 +1,6 @@
 // Project: myBlackJack 
 // Created: Begining September 2021
 
-// #import_plugin MyNewPlugin
-
-
 // Use and Choose the OpenGL renderer
 
 #renderer "Basic"
@@ -31,10 +28,12 @@ SetCardReset()
 // Grafik-Daten laden
 
 backdrop0 	= LoadImage("blackjack/Blackjack-Cards_L.png")
-CoverSheet	= LoadImage("blackjack/Coversheet_L.png")
 
+CoverSheet	= LoadImage("blackjack/Coversheet_L.png")
 CoverSheetCard = CreateSprite (CoverSheet)
 SetSpriteSize(CoverSheetCard, MAX_DRAW_CARD_X_LENGH/2, MAX_DRAW_CARD_Y_LENGH / 2 )
+SetSpriteVisible(CoverSheetCard, 0)
+
 
 // 52 Karten mischen und in einer Array eintragen
 
@@ -50,12 +49,7 @@ FillCardToSprite ()
 DeleteAnyArrays ()
 
 
- for a = 1 to 4 
- 	
- 	PutFourCards [a] = CardsDeckRandom [1]
- 	CardsDeckRandom.remove(1)
- 	 	
- 	next a    
+Draw_Four_Card ()
 
 // CPU - Player
 
@@ -79,6 +73,8 @@ SetVirtualButtonActive (BUTTON_NEW_CARD, 0)
 
 
 do
+	
+	/**
 
 	if PlayerScore > MAX_SCORE_CARD and CardGameOver = 0
 		
@@ -93,8 +89,9 @@ do
 		
 		endif
 	
+	**/
 	
-	if GMaxCard =< 1
+	if GMaxCard < 1
 		
 		SetVirtualButtonActive(BUTTON_NEW_CARD,0)	
 		SetVirtualButtonVisible(BUTTON_NEW_CARD,0)
@@ -127,10 +124,9 @@ do
 	if GetVirtualButtonPressed(BUTTON_NEW_CARD) 
 		
 			PlayerScore = 0
-			NewCardDeck[0] = 1 // Schalter
-		
-			// if CardsDeckRandom [1]
 			
+			NewCardDeck[0] = 1 // Schalter
+					
 			PutFourCards [2] = CardsDeckRandom [1]
 			CardsDeckRandom.remove(1)
 			
@@ -141,6 +137,56 @@ do
  	
 	endif
 	
+	// If Pressed "New Game"	(Wenn der Spieler ein neues Spiel beginnen möchte)
+	
+	if GetVirtualButtonPressed(BUTTON_NEW_GAME) 
+		
+		local HideDrawCard as integer = 0
+		
+		// Schalter		
+			
+		NewCardDeck[0] = 1
+		
+			
+		// restlichen Karten entfernen / unsichtbar machen
+		
+		if not DrawCardNum = 0
+				
+			for HideDrawCard = 1 to DrawCardNum
+			
+				SetSpriteVisible(SavePlayerDrawCardID[(SPlayDrawCdIDCounter-HideDrawCard)+1],0)
+			
+			next HideDrawCard 
+	
+		endif
+									
+			// Puenkte für Spieler zurücksetzen
+			
+			PlayerScore = 0
+			
+			// Neue Karten ziehen für CPU und Player
+			
+			Draw_Four_Card ()
+			
+			// CPU - Player
+			
+			SetSpriteVisible(CPUFirstCardShow, 0)
+			SetSpriteVisible(CPUSecondsCardShow, 0)
+			
+			// 2 Karten fuer CPU geben			
+			
+			SetCPUCard ()
+			
+			// 2 Karten fuer Player geben
+			
+			SetPlayerCard ()
+			
+			// Draw Card Counter to NULL
+			
+			DrawCardNum = 0
+ 	
+	endif
+		
 	intern_debug ()
 			
 	Sync ()
@@ -148,6 +194,18 @@ do
 loop
 
 // <-- Hauptprogramm <--
+
+Function Draw_Four_Card ()
+
+ for a = 1 to 4 
+ 	
+ 	PutFourCards [a] = CardsDeckRandom [1]
+ 	CardsDeckRandom.remove(1)
+ 	 	
+ 	next a    
+
+EndFunction
+
 
 
 Function SetCardReset()
@@ -334,24 +392,30 @@ EndFunction
 Function SetCPUCard ()
 	
 	local XPosButton 			as integer 	=	0
-	local YPosButton 			as integer 	=	0
-	local FirstCardShow			as integer 	= 	0
-	local CoverSheetCardShow		as integer	=	0
+	local YPosButton 			as integer 	=	0	
+	local CPUCoverSheetCardShow		as integer	=	0
+	
+	SetCardReset()
 	
 	XPosButton = ( MAX_WINDOW_SIZE_X / 2 ) - (MAX_DRAW_CARD_X_LENGH / 2 ) + (MAX_DRAW_CARD_X_LENGH / 2 )
 	YPosButton = ( MAX_WINDOW_SIZE_Y / 2 ) - (MAX_DRAW_CARD_Y_LENGH / 2 ) + (MAX_DRAW_CARD_Y_LENGH / 2 )
 	
-	FirstCardShow	= 	ViewAndSetCardXY ( PutFourCards[1],  XPosButton - 85, YPosButton - 275) 
-	SetSpriteDepth ( FirstCardShow, GSetDepthCard )
+	CPUFirstCardShow	= 	ViewAndSetCardXY ( PutFourCards[1],  XPosButton - 85, YPosButton - 275) 
+	SetSpriteDepth ( CPUFirstCardShow, GSetDepthCard )
 	GSetDepthCard	=	(MAX_DEPTH_CARD  - 	2)
 	
-	SecondsCardShow	=	ViewAndSetCardXY ( PutFourCards[3],  XPosButton, YPosButton - 275) 
-	SetSpriteDepth ( SecondsCardShow, GSetDepthCard )
+	CPUSecondsCardShow	=	ViewAndSetCardXY ( PutFourCards[3],  XPosButton, YPosButton - 275) 
+	SetSpriteDepth ( CPUSecondsCardShow, GSetDepthCard )
 	GSetDepthCard	=	(MAX_DEPTH_CARD  - 	1)
-		
+	
+	/**
+			
 	SetSpritePosition(CoverSheetCard, XPosButton, YPosButton - 275 )
 	SetSpriteDepth ( CoverSheetCard, MAX_DEPTH_CARD )
 	SetSpriteVisible(SecondsCardShow,0)
+	SetSpriteVisible(CoverSheetCard, 0)
+	
+	**/
 	
 	// Kartenzaehler zwei Abziehen
 	
@@ -671,58 +735,59 @@ Function SetVariable ()
 	
 	// Kontrollflags für Button "Neuen Kartendeck für Player"
 	
-	global CardGameOver 			as integer = 0
+	global CardGameOver 				as integer = 0
 		
-	global SPlayDrawCdIDCounter	as integer = 0
-	global SavePlayerDrawCardID	as integer[53]
+	global SPlayDrawCdIDCounter		as integer = 0
+	global SavePlayerDrawCardID		as integer[53]
 	
-	global NewCardDeck			as integer[3] = [0,0,0]
+	global NewCardDeck				as integer[3] = [0,0,0]
 	
-	global PlayerScore			as integer = 0
+	global PlayerScore				as integer = 0
 	
-	global GMaxCard				as integer = 52
+	global GMaxCard					as integer = 52
 	
-	global CPUScore				as integer
+	global CPUScore					as integer
 	
-	global backdrop0 			as integer = 0
-	global ID_CardsDeckFT 		as integer[52]
-	global SPR_CardsDeckFT 		as integer[52]
-	global CardsDeckRandom 		as integer[54]
+	global backdrop0 				as integer = 0
+	global ID_CardsDeckFT 			as integer[52]
+	global SPR_CardsDeckFT 			as integer[52]
+	global CardsDeckRandom 			as integer[54]
 	
-	global CardsDeckFT 			as integer[17]
-	global CardsDeckX 			as integer[12]
-	global CardsDeckY 			as integer[3]
+	global CardsDeckFT 				as integer[17]
+	global CardsDeckX 				as integer[12]
+	global CardsDeckY 				as integer[3]
 	
-	global Zahltreffer 			as string
-	global a,b,c 				as integer
-	global CardsErrorCode 		as integer
+	global Zahltreffer 				as string
+	global a,b,c 					as integer
+	global CardsErrorCode 			as integer
 	
-	global CoverSheet 			as integer
-	global CoverSheetCard 		as integer
+	global CoverSheet 				as integer
+	global CoverSheetCard 			as integer
 		
-	global PutFourCards 			as integer[4]
-	global SecondsCardShow 		as integer 	= 0
+	global PutFourCards 				as integer[4]
+	global CPUSecondsCardShow 		as integer 	= 0
+	global CPUFirstCardShow			as integer 	= 	0
 		
-	global XButton 				as integer
-	global YButton 				as integer
+	global XButton 					as integer
+	global YButton 					as integer
 	
-	global DrawCardNum			as	integer	=	0
-	global Push_DrawCardNum		as 	integer	=	0
+	global DrawCardNum				as	integer	=	0
+	global Push_DrawCardNum			as 	integer	=	0
 	
-	global BackupNum				as	integer	=	0
+	global BackupNum					as	integer	=	0
 	
-	global XButton_Move			as	integer	=	0
-	global YButton_Move 			as	integer	= 	0
+	global XButton_Move				as	integer	=	0
+	global YButton_Move 				as	integer	= 	0
 	
-	global PlayerCardID			as	integer	=	0
-	global GSetDepthCard			as	integer	=	MAX_DEPTH_CARD
+	global PlayerCardID				as	integer	=	0
+	global GSetDepthCard				as	integer	=	MAX_DEPTH_CARD
 	
-	global Max_DrawCardNum 		as 	integer = 0
+	global Max_DrawCardNum 			as 	integer = 0
 	
 	// Boolean - Werte
 	
-	global Column_Enable			as	integer 	= 	0
-	global DeckButtonBoolean 	as 	integer 	= 	1
+	global Column_Enable				as	integer 	= 	0
+	global DeckButtonBoolean 		as 	integer 	= 	1
 
 	
 endfunction
