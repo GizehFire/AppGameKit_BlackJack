@@ -51,7 +51,7 @@ output_path=
 FILE_0=main.agc;-1
 
 [files]
-FILE_NAME_0=1;main.agc;136;0
+FILE_NAME_0=1;main.agc;241;0
 
 [watchvariables]
 watch_variable=@Version;
@@ -62,4 +62,6 @@ watch_variable=XButton;
 watch_variable=XButton_Move;
 watch_variable=YButton;
 watch_variable=YButton_Move;
+watch_variable=ersteAusgabe;
+watch_variable=zweiteAusgabe;
 
