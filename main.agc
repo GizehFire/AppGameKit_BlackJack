@@ -5,8 +5,23 @@
 
 #renderer "Basic"
 
-// declare and set Constants
 
+// declare Type
+	
+	Type _Dealer
+		
+		
+		Enable		 		as integer
+		Enable_Hold_Player	as integer
+		CardPosX				as integer
+		CardPosY				as integer
+		
+		CardID				as integer
+		
+		EndType
+
+
+// declare and set Constants
 
 SetConstant ()
 
@@ -49,7 +64,7 @@ Draw_Four_Card ()
 
 // CPU - Player
 
-SetDealerCard ()
+SetDealerCard (1)
 
 // Player
 
@@ -65,25 +80,32 @@ SetVirtualButtonVisible (BUTTON_NEW_CARD, 0)
 SetVirtualButtonActive (BUTTON_NEW_CARD, 0)
 
 
+DealerPlayer.Enable_Hold_Player = 0
+
 // --> Hauptprogramm -->
 
-do
+do	
+
+	if GetVirtualButtonReleased (BUTTON_DEALER) then SetDrawDealerCard ()
 	
-/**
+	
 	if PlayerScore > MAX_SCORE_CARD and CardGameOver = 0
 		
 		Message (" BUST: Over 21 Lose. Your Card: [ " + str (PlayerScore) + " ]")		
+		
 		SetVirtualButtonVisible (BUTTON_DRAW, 0)
 		SetVirtualButtonActive (BUTTON_DRAW, 0)
 		
 		SetVirtualButtonVisible (BUTTON_HOLD, 0)
 		SetVirtualButtonActive (BUTTON_HOLD, 0)
 		
-		CardGameOver = 1
+		CardGameOver 	=	1
+		
+		// DealerScore   = 	0
+		// PlayerScore	=	0
 		
 		endif
-	**/
-	
+		
 	
 	if GMaxCard < 1
 		
@@ -97,11 +119,11 @@ do
 		
 	endif
 		
-	// If Pressed "EXIT / Quit"
+	// If Pressed "EXIT / QUIT"
 		
 	if GetVirtualButtonReleased(BUTTON_EXIT) then end 
 	
-	// If Pressed "draw / HIT "	(Wenn der Spieler eine weitere Karte zieht)
+	// If Pressed "DRAW / HIT"	(Wenn der Spieler eine weitere Karte zieht)
 	
 	if GetVirtualButtonReleased(BUTTON_DRAW) 
 	
@@ -112,7 +134,7 @@ do
 
 	// Weitere Karten ziehen	
 		
-		Player_Pressed_Draw_V2 ()
+		SetDrawPlayerCard ()
 	
 	endif
 	
@@ -176,15 +198,15 @@ Function CoverDeckCards (Enable as integer)
 	
 	if Enable then DealerSecondShowEnable = 0
 	  
-	SetSpritePosition( CoverSheetCard, DeckPosX, DeckPosY )
-	SetSpriteDepth ( CoverSheetCard, MAX_DEPTH_CARD )
-	SetSpriteVisible ( DealerSecondsCardShow,DealerSecondShowEnable)
-	SetSpriteVisible ( CoverSheetCard, Enable)
+		SetSpritePosition( CoverSheetCard, DealerCardDeckPosX, DealerCardDeckPosY	)
+		SetSpriteDepth ( CoverSheetCard, MAX_DEPTH_CARD )
+		SetSpriteVisible ( DealerSecondsCardShow,DealerSecondShowEnable)
+		SetSpriteVisible ( CoverSheetCard, Enable)
 			
-	EndFunction
+	EndFunction (Enable)
 	
 Function SetHoldPlayerCard ()
-	
+		
 	// Die zweite verdeckte Karte von Dealer zeigen
 			
 	CoverDeckCards (0)
@@ -198,10 +220,86 @@ Function SetHoldPlayerCard ()
 	
 	SetVirtualButtonVisible (BUTTON_HOLD, 0)
 	SetVirtualButtonActive (BUTTON_HOLD, 0)
+		
+	// Die zweite Karte (vorher gedeckte) mit der ersten Karte zusammenzaehlen
+		
+	DealerScore =  DealerScore + AddCard_V1 (3)	
 	
-	// Karten von Dealer zaehlen
-	    					
-	DealerScore = DealerScore + AddCard_V1(3)
+	while DealerScore < 17		
+				
+		SetDrawDealerCard ()
+			
+	endwhile
+	
+	
+	EndFunction
+
+Function SetDrawDealerCard ()
+	
+	local LDealerCardDeckPosX	as integer = 0
+	local LDealerCardDeckPosY	as integer = 0
+	local LDealerCardID			as integer = 0
+	
+		
+	if DealerPlayer.Enable = 0 
+	
+		LDealerCardDeckPosX = DealerCardDeckPosX + ( MAX_DRAW_CARD_X_LENGH / 2 ) + 5
+		LDealerCardDeckPosY = DealerCardDeckPosY 
+	
+		DealerPlayer.CardPosX = DealerPlayer.CardPosX + ( MAX_DRAW_CARD_X_LENGH / 2 ) - 45
+		DealerPlayer.CardPosY = LDealerCardDeckPosY
+	
+		// 1.
+	
+		DealerPlayer.CardPosX = DealerPlayer.CardPosX + LDealerCardDeckPosX
+	
+		// 2.
+	
+		DealerPlayer.CardPosX = DealerPlayer.CardPosX - 85		
+			
+	endif
+		
+		if DealerPlayer.Enable = 1
+		
+				DealerPlayer.CardPosX = DealerPlayer.CardPosX + 45
+																		
+		endif
+	
+	// Dealer ist an der Reihe
+	
+	DealerPlayer.Enable = 1
+	
+	// Zweite Karte von Dealer aufdecken
+	
+	CoverDeckCards(0)
+	
+	// Hole eine zufällige Karte vom Kartendeck
+	// lege es in Cache-Array ab
+	
+	PutFourCards [1] = CardsDeckRandom [1]
+
+	// geholte Karte aus dem Karten Arrays löschen
+		
+	CardsDeckRandom.remove(1)
+	
+	// Hole ID von der geholten Karte und Karte auf dem Bildschirm zeichnen
+	
+	LDealerCardID = ViewAndSetCardXY ( PutFourCards[1],  DealerPlayer.CardPosX, DealerPlayer.CardPosY)	
+	
+		
+	inc DrawCardNum	
+	inc SPlayDrawCdIDCounter
+	
+	SavePlayerDrawCardID [SPlayDrawCdIDCounter] = LDealerCardID
+		
+	
+	GSetDepthCard = GSetDepthCard - 1
+	SetSpriteDepth(LDealerCardID,GSetDepthCard)
+	
+	DealerScore =  DealerScore + AddCard_V1 (1)
+				
+	GMaxCard = GMaxCard - 1
+		
 	
 	EndFunction
 
@@ -210,37 +308,50 @@ Function NewCardGame()
 	
 	local HideDrawCard as integer = 0
 	
+		// Schalter für Spielende ausschalten
+	
+		CardGameOver	 =	0	
 	
 		// Schalter		
 			
 		NewCardDeck [0] = 1
 		
 			
-		// restlichen Karten entfernen / unsichtbar machen
+		// alle restlichen Karten entfernen / unsichtbar machen
 		
-		if not DrawCardNum = 0
+			if not DrawCardNum = 0
 				
-			for HideDrawCard = 1 to DrawCardNum
+				for HideDrawCard = 1 to DrawCardNum
 			
-				SetSpriteVisible(SavePlayerDrawCardID[(SPlayDrawCdIDCounter-HideDrawCard)+1],0)
+					SetSpriteVisible(SavePlayerDrawCardID[(SPlayDrawCdIDCounter-HideDrawCard)+1],0)
 			
-			next HideDrawCard 
+				next HideDrawCard 
 	
-		endif
-									
+			endif
+		
+			// Dealer Karten und Boolean zurücksetzen
+					
+			DealerPlayer.Enable = 0
+			DealerPlayer.CardPosX = 0
+			DealerPlayer.CardPosY = 0
+			
+			// Vormerkung daß, dass die erste Karte von
+			// Dealer noch gezaehlt werden musst
+			
+			DealerPlayer.Enable_Hold_Player = 0				
+		
 			// Puenkte für Spieler und Dealer zurücksetzen
 			
-			PlayerScore = 0
-			
+			PlayerScore = 0			
 			DealerScore = 0
 			
 			// Neue Karten ziehen für Dealer und Player
 			
 			Draw_Four_Card ()
 			
-			// CPU - Player
+			// Dealer - Player
 			
-			SetSpriteVisible(CPUFirstCardShow, 0)
+			SetSpriteVisible(DealerFirstCardShow, 0)
 			SetSpriteVisible(DealerSecondsCardShow, 0)			
 			
 			// Zieh - Kartenpostition X und Y zuruecksetzen
@@ -252,9 +363,10 @@ Function NewCardGame()
 			
 			DrawCardNum = 0			
 			
-			// 2 Karten fuer CPU geben			
+			// 2 Karten fuer Dealer geben	und 
+			// zweite Karte umdrehen
 			
-			SetDealerCard ()
+			SetDealerCard (1)
 			
 			// 2 Karten fuer Player geben
 						
@@ -384,7 +496,7 @@ endselect
 EndFunction CardCounterSave
 
 	
-	Function Player_Pressed_Draw_V2 ()
+	Function SetDrawPlayerCard ()
 	
 		local Counter as integer = 0	
 	
@@ -452,25 +564,22 @@ EndFunction CardCounterSave
 	EndFunction
 
 
-Function SetDealerCard ()
+Function SetDealerCard (CardEnable as integer )
 	
 	local XPosButton 			as integer 	=	0
 	local YPosButton 			as integer 	=	0		
 	
 	local XPosxExtra				as integer	= 	85
 	local YPosxExtra				as integer	= 	275
-	
-	global DeckPosX				as integer	=	0
-	global DeckPosY				as integer	=	0
-	
+		
 	SetCardReset()
 	
 	XPosButton = ( MAX_WINDOW_SIZE_X / 2 ) - (MAX_DRAW_CARD_X_LENGH / 2 ) + (MAX_DRAW_CARD_X_LENGH / 2 )
 	YPosButton = ( MAX_WINDOW_SIZE_Y / 2 ) - (MAX_DRAW_CARD_Y_LENGH / 2 ) + (MAX_DRAW_CARD_Y_LENGH / 2 )
 	
-	CPUFirstCardShow	= 	ViewAndSetCardXY ( PutFourCards[1],  XPosButton - XPosxExtra, YPosButton - YPosxExtra) 
-	SetSpriteDepth ( CPUFirstCardShow, GSetDepthCard )
-	GSetDepthCard	=	(MAX_DEPTH_CARD  - 	2)
+	DealerFirstCardShow	= 	ViewAndSetCardXY ( PutFourCards[1],  XPosButton - XPosxExtra, YPosButton - YPosxExtra) 
+	SetSpriteDepth ( DealerFirstCardShow, GSetDepthCard )
+	GSetDepthCard	=	( MAX_DEPTH_CARD  - 	2 )
 	
 	DealerScore = DealerScore + AddCard_V1(1) 
 	
@@ -480,8 +589,8 @@ Function SetDealerCard ()
 	
 	// Variablen für Funktionausgabe
 	
-	DeckPosX = XPosButton
-	DeckPosY = YPosButton - YPosxExtra
+	DealerCardDeckPosX = XPosButton
+	DealerCardDeckPosY = YPosButton - YPosxExtra
 			
 	// Kartenzaehler zwei Abziehen
 	
@@ -489,7 +598,7 @@ Function SetDealerCard ()
 	
 	// Zweite Karte von Dealer decken
 	
-	CoverDeckCards (1)
+	CoverDeckCards (CardEnable)
 	
 EndFunction 
 
@@ -544,17 +653,22 @@ Function MakeButton ()
 AddVirtualButton(BUTTON_DRAW, XButton - 50, YButton + 175, 75)
 AddVirtualButton(BUTTON_HOLD, XButton + 50, YButton + 175, 75)
 AddVirtualButton(BUTTON_EXIT, MAX_WINDOW_SIZE_X-80, MAX_WINDOW_SIZE_Y-80, 75)
+
 AddVirtualButton(BUTTON_NEW_CARD, XButton, YButton + 250, 0)
 SetVirtualButtonSize(BUTTON_NEW_CARD, 150,50)
 
 AddVirtualButton(BUTTON_NEW_GAME, XButton, YButton + 325, 0)
 SetVirtualButtonSize(BUTTON_NEW_GAME, 150,50)
 
+AddVirtualButton(BUTTON_DEALER, MAX_WINDOW_SIZE_X-160, MAX_WINDOW_SIZE_Y-80, 75)
+
+
 SetVirtualButtonText(BUTTON_DRAW,"Ziehen")
 SetVirtualButtonText(BUTTON_HOLD,"Halten")
 SetVirtualButtonText(BUTTON_EXIT,"Exit")
 SetVirtualButtonText(BUTTON_NEW_CARD,"Neue Karten")
 SetVirtualButtonText(BUTTON_NEW_GAME,"Neues Spiel")
+SetVirtualButtonText(BUTTON_DEALER,"Dealer")
 
 EndFunction
 
@@ -763,8 +877,7 @@ Function SetWindowsDeviceProperty ()
 	EndFunction
 
 Function NULL ()
-	
-	
+
 
 EndFunction
 
@@ -775,8 +888,8 @@ Function SetConstant ()
 	#constant BUTTON_HOLD			=	2
 	#constant BUTTON_EXIT			=	3
 	#constant BUTTON_NEW_CARD		=	4
-	#constant BUTTON_NEW_GAME		=	5
-	
+	#constant BUTTON_NEW_GAME		=	5	
+	#constant BUTTON_DEALER		=	6	
 	
 	
 	#constant MAX_SHOW_DRAW_CARD		=	4
@@ -803,48 +916,49 @@ Function SetVariable ()
 	
 	#option_explicit
 	
-	// global CardCounterSave			as integer	=	0
+	global DealerPlayer				as	_Dealer
+					
+	global DealerCardDeckPosX		as 	integer	=	0
+	global DealerCardDeckPosY		as 	integer	=	0
 	
-	global DealerSecondsCardShow		as integer	=	0
-	
-	
-	// Kontrollflags für Button "Neuen Kartendeck für Player"
-	
-	global CPUCoverSheetCardShow		as integer	= 	0
-	
-	global CardGameOver 				as integer 	= 	0
+	global DealerFirstCardShow		as 	integer 	= 	0		
+	global DealerSecondsCardShow		as 	integer	=	0		
 		
-	global SPlayDrawCdIDCounter		as integer 	= 	0
-	global SavePlayerDrawCardID		as integer [53]
+	global SPlayDrawCdIDCounter		as 	integer 	= 	0
+	global SavePlayerDrawCardID		as 	integer [53]
 	
-	global NewCardDeck				as integer [3] = [0,0,0]
+	global NewCardDeck				as 	integer [3] = [0,0,0]
 	
-	global DealerScore					as integer 	= 	0
-	global PlayerScore				as integer 	= 	0
+	// Punkte für Player und Dealer
 	
-	global GMaxCard					as integer 	= 	52
+	global DealerScore				as 	integer 	= 	0
+	global PlayerScore				as 	integer 	= 	0
+	
+	// Maxmimaler Karten von Deck genommen?
+	
+	global GMaxCard					as 	integer 	= 	52
+			
+	global backdrop0 					as 	integer 	= 	0
+	global ID_CardsDeckFT 			as 	integer [52]
+	
+	global SPR_CardsDeckFT 			as 	integer [52]
+	global CardsDeckRandom 			as 	integer [54]
+	
+	global CardsDeckFT 				as 	integer [17]
+	global CardsDeckX 				as 	integer [12]
+	global CardsDeckY 				as 	integer [3]
+	
+	global Zahltreffer 				as 	string
+	global a,b,c 					as 	integer
+	global CardsErrorCode 			as 	integer
+	
+	global CoverSheet 				as 	integer
+	global CoverSheetCard 			as 	integer
 		
-	global backdrop0 				as integer 	= 	0
-	global ID_CardsDeckFT 			as integer [52]
-	global SPR_CardsDeckFT 			as integer [52]
-	global CardsDeckRandom 			as integer [54]
+	global PutFourCards 				as 	integer [4]
 	
-	global CardsDeckFT 				as integer [17]
-	global CardsDeckX 				as integer [12]
-	global CardsDeckY 				as integer [3]
-	
-	global Zahltreffer 				as string
-	global a,b,c 					as integer
-	global CardsErrorCode 			as integer
-	
-	global CoverSheet 				as integer
-	global CoverSheetCard 			as integer
-		
-	global PutFourCards 				as integer [4]
-	global CPUFirstCardShow			as integer 	= 	0
-		
-	global XButton 					as integer
-	global YButton 					as integer
+	global XButton 					as 	integer
+	global YButton 					as 	integer
 	
 	global DrawCardNum				as	integer	=	0
 	global Push_DrawCardNum			as 	integer	=	0
@@ -859,10 +973,13 @@ Function SetVariable ()
 	
 	global Max_DrawCardNum 			as 	integer = 	0
 		
-	// Boolean - Werte
+	// Boolean - Werte / Kontrollflags
 	
 	global Column_Enable				as	integer 	= 	0
-	global DeckButtonBoolean 		as 	integer 	= 	1
+	global DeckButtonBoolean 			as 	integer 	= 	1
+	
+	global CardGameOver 				as 	integer 	= 	0
+	
 
 	
 endfunction
