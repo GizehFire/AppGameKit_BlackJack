@@ -12,7 +12,8 @@
 		
 		
 		Enable		 		as integer
-		Enable_Hold_Player	as integer
+		Score				as integer
+		
 		CardPosX				as integer
 		CardPosY				as integer
 		
@@ -79,8 +80,10 @@ MakeButton ()
 SetVirtualButtonVisible (BUTTON_NEW_CARD, 0)
 SetVirtualButtonActive (BUTTON_NEW_CARD, 0)
 
+// Button "Dealer" deaktivieren (Das dient nur zu Testzwecken [Debug])
 
-DealerPlayer.Enable_Hold_Player = 0
+SetVirtualButtonVisible (BUTTON_DEALER, 0)
+SetVirtualButtonActive (BUTTON_DEALER, 0)
 
 // --> Hauptprogramm -->
 
@@ -164,7 +167,15 @@ do
 
 	// If Pressed "Hold"	(Wenn der Spieler kein weiteren Karten ziehen möchte)
 		
-	if GetVirtualButtonReleased(BUTTON_HOLD) then SetHoldPlayerCard()
+	if GetVirtualButtonReleased(BUTTON_HOLD)
+	
+	SetHoldPlayerCard()
+	
+	// Karten auswerten
+	
+	GetCards_Evaluation()
+	
+	endif
 
 		
 	Intern_Debug ()
@@ -176,11 +187,31 @@ loop
 // <-- Hauptprogramm <--
 
 
+Function GetCards_Evaluation()
+		
+	if DealerPlayer.Score < PlayerScore or DealerPlayer.Score > MAX_SCORE_CARD
+		
+		Message ("You've has won")
+	
+	elseif PlayerScore < DealerPlayer.Score  or PlayerScore > MAX_SCORE_CARD
+		
+		Message ("Dealer has won")
+	
+	
+	endif
+	
+	if DealerPlayer.Score = PlayerScore then	Message ("draw")
+	
+
+EndFunction
+	
+
+
 Function Intern_Debug ()
 				
 		Print ("BJ Cards - myBlackJack")
 		Print ("Player Score: " + str ( PlayerScore ) )
-		Print ("Dealer Score: " + str( DealerScore ) )
+		Print ("Dealer Score: " + str( DealerPlayer.Score ) )
 		Print ("Cards Count: " + str(52 - GMaxCard))
 				
 		// Print ("Cards Count: " + str( CardsDeckRandom.length ))		
@@ -223,9 +254,9 @@ Function SetHoldPlayerCard ()
 		
 	// Die zweite Karte (vorher gedeckte) mit der ersten Karte zusammenzaehlen
 		
-	DealerScore =  DealerScore + AddCard_V1 (3)	
+	DealerPlayer.Score =  DealerPlayer.Score + AddCard_V1 (3)	
 	
-	while DealerScore < 17		
+	while DealerPlayer.Score < 17		
 				
 		SetDrawDealerCard ()
 			
@@ -296,7 +327,7 @@ Function SetDrawDealerCard ()
 	GSetDepthCard = GSetDepthCard - 1
 	SetSpriteDepth(LDealerCardID,GSetDepthCard)
 	
-	DealerScore =  DealerScore + AddCard_V1 (1)
+	DealerPlayer.Score =  DealerPlayer.Score + AddCard_V1 (1)
 				
 	GMaxCard = GMaxCard - 1
 		
@@ -334,16 +365,12 @@ Function NewCardGame()
 			DealerPlayer.Enable = 0
 			DealerPlayer.CardPosX = 0
 			DealerPlayer.CardPosY = 0
-			
-			// Vormerkung daß, dass die erste Karte von
-			// Dealer noch gezaehlt werden musst
-			
-			DealerPlayer.Enable_Hold_Player = 0				
+									
 		
 			// Puenkte für Spieler und Dealer zurücksetzen
 			
 			PlayerScore = 0			
-			DealerScore = 0
+			DealerPlayer.Score = 0
 			
 			// Neue Karten ziehen für Dealer und Player
 			
@@ -581,7 +608,7 @@ Function SetDealerCard (CardEnable as integer )
 	SetSpriteDepth ( DealerFirstCardShow, GSetDepthCard )
 	GSetDepthCard	=	( MAX_DEPTH_CARD  - 	2 )
 	
-	DealerScore = DealerScore + AddCard_V1(1) 
+	DealerPlayer.Score = DealerPlayer.Score + AddCard_V1(1) 
 	
 	DealerSecondsCardShow	=	ViewAndSetCardXY ( PutFourCards[3],  XPosButton, YPosButton - YPosxExtra) 
 	SetSpriteDepth ( DealerSecondsCardShow, GSetDepthCard )
@@ -930,8 +957,7 @@ Function SetVariable ()
 	global NewCardDeck				as 	integer [3] = [0,0,0]
 	
 	// Punkte für Player und Dealer
-	
-	global DealerScore				as 	integer 	= 	0
+		
 	global PlayerScore				as 	integer 	= 	0
 	
 	// Maxmimaler Karten von Deck genommen?
