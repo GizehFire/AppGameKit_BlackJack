@@ -51,13 +51,10 @@ output_path=
 FILE_0=main.agc;-1
 
 [files]
-FILE_NAME_0=1;main.agc;981;0
 
 [watchvariables]
 watch_variable=@Version;
-watch_variable=CardsDeckRandom;
-watch_variable=DealerPlayer.CardPosX;
-watch_variable=LDealerCardDeckPosX;
-watch_variable=LDealerCardDeckPosY;
-watch_variable=SavePlayerDrawCardID;
+watch_variable=CardsDeckFT;
+watch_variable=CardsDeckX;
+watch_variable=CardsDeckY;
 

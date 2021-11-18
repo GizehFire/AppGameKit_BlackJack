@@ -1,26 +1,26 @@
 // Project: myBlackJack 
 // Created: Begining September 2021
 
-// Use and Choose the OpenGL renderer
+#renderer "Basic" // Use and Choose the OpenGL renderer
 
-#renderer "Basic"
+// Declare Type
 
+// * * * * * * * * * * * * * *
+// * * * H I N W E  I S : "GoSub"
+// * * *
+// * * *
+// Sprungmarke GoSub habe ich nur Ausnahmweise benutzt,
+// da innherhalb der Funktion "Function" zur Zeit keine
+// Type Deklarartion aktzeptiert werden. Ansonsten bleibt die
+// Gosub Anweisung eine Ausnahmeweise. Gosub sollte Aufgrund eines
+// Gefahr, des Spaghetti-Code verzichtet werden, anstelle mit der Funktion,
+// zu arbeiten.
+// * * *
+// * * *
 
-// declare Type
-	
-	Type _Dealer
-		
-		
-		Enable		 		as integer
-		Score				as integer
-		
-		CardPosX				as integer
-		CardPosY				as integer
-		
-		CardID				as integer
-		
-		EndType
+GoSub SetTypes // "Gosub" Verwendung -> AUSNAHME!
 
+// * * * * * * * * * * * * * *
 
 // declare and set Constants
 
@@ -36,14 +36,13 @@ SetErrorMode(2)
 
 SetWindowsDeviceProperty ()
 
-
 // Variablen mit Werten zuweisen
 
-SetCardReset()
+SetCardReset() 
 
 // Grafik-Daten laden
 
-backdrop0 	= LoadImage("blackjack/Blackjack-Cards_L.png")
+Int_CardImage 	= LoadImage("blackjack/Blackjack-Cards_L.png")
 
 CoverSheet	= LoadImage("blackjack/Coversheet_L.png")
 CoverSheetCard = CreateSprite (CoverSheet)
@@ -51,13 +50,16 @@ SetSpriteSize ( CoverSheetCard, MAX_DRAW_CARD_X_LENGH/2, MAX_DRAW_CARD_Y_LENGH /
 SetSpriteVisible ( CoverSheetCard, 0 )
 
 
-// 52 Karten mischen und in einer Array eintragen
+// 52 Karten mischen und in einer Array (=> IntArray_Mixed_Card) eintragen
 
 ShuffleCards ()
+
 FillCardTable ()
+
+
+
 PutCardPosXY ()
 
-// SPR_CardsDeckFT[1] = CreateSprite (ID_CardsDeckFT[52])
 
 FillCardToSprite ()
 DeleteAnyArrays ()
@@ -92,7 +94,7 @@ do
 	if GetVirtualButtonReleased (BUTTON_DEALER) then SetDrawDealerCard ()
 	
 	
-	if PlayerScore > MAX_SCORE_CARD and CardGameOver = 0
+	if PlayerScore > MAX_SCORE_CARD and Bol_CardGameOver = 0
 		
 		Message (" BUST: Over 21 Lose. Your Card: [ " + str (PlayerScore) + " ]")		
 		
@@ -102,7 +104,7 @@ do
 		SetVirtualButtonVisible (BUTTON_HOLD, 0)
 		SetVirtualButtonActive (BUTTON_HOLD, 0)
 		
-		CardGameOver 	=	1
+		Bol_CardGameOver 	=	1
 		
 		// DealerScore   = 	0
 		// PlayerScore	=	0
@@ -110,7 +112,7 @@ do
 		endif
 		
 	
-	if GMaxCard < 1
+	if Int_MaxCard < 1
 		
 		SetVirtualButtonActive(BUTTON_NEW_CARD,0)	
 		SetVirtualButtonVisible(BUTTON_NEW_CARD,0)
@@ -147,17 +149,16 @@ do
 		
 			PlayerScore = 0
 			
-			NewCardDeck[0] = 1 // Schalter
+			IntArray_NewCardDeck[0] = 1 // Schalter
 					
-			PutFourCards [2] = CardsDeckRandom [1]
-			CardsDeckRandom.remove(1)
+			IntArray_GetFourCards [2] = IntArray_Mixed_Card [1]
+			IntArray_Mixed_Card.remove(1)
 			
-			PutFourCards [4] = CardsDeckRandom [1]
-			CardsDeckRandom.remove(1)
+			IntArray_GetFourCards [4] = IntArray_Mixed_Card [1]
+			IntArray_Mixed_Card.remove(1)
 					
 			SetPlayerCard ()
-					
- 	
+					 	
 	endif
 	
 	// If Pressed "New Game"	(Wenn der Spieler ein neues Spiel beginnen möchte)	
@@ -204,20 +205,18 @@ Function GetCards_Evaluation()
 	
 
 EndFunction
-	
-
 
 Function Intern_Debug ()
 				
 		Print ("BJ Cards - myBlackJack")
 		Print ("Player Score: " + str ( PlayerScore ) )
 		Print ("Dealer Score: " + str( DealerPlayer.Score ) )
-		Print ("Cards Count: " + str(52 - GMaxCard))
+		Print ("Cards Count: " + str(52 - Int_MaxCard))
 				
 		// Print ("Cards Count: " + str( CardsDeckRandom.length ))		
-		// Print ("XButton: " + str(XButton + XButton_Move) + " YButton: " + str(YButton - YButton_Move))
-		// Print ("XButton_Move: " + str(XButton_Move))
-		// Print ("YButton_Move: " + str(YButton_Move))
+		// Print ("Int_XPosSetImage: " + str(Int_XPosSetImage + Int_XPosSetImage_Move) + " Int_YPosSetImage: " + str(Int_YPosSetImage - Int_YPosSetImage_Move))
+		// Print ("Int_XPosSetImage_Move: " + str(Int_XPosSetImage_Move))
+		// Print ("Int_YPosSetImage_Move: " + str(Int_YPosSetImage_Move))
 		// if GetSpriteExists(PlayerCardID) then Print("Card ID: " + str(PlayerCardID ))
 		// if GetSpriteExists(PlayerCardID) then Print("Depth: " + str ( GetSpriteDepth( PlayerCardID ) ))
 	
@@ -229,7 +228,7 @@ Function CoverDeckCards (Enable as integer)
 	
 	if Enable then DealerSecondShowEnable = 0
 	  
-		SetSpritePosition( CoverSheetCard, DealerCardDeckPosX, DealerCardDeckPosY	)
+		SetSpritePosition( CoverSheetCard, Int_DealerCardDeckPosX, Int_DealerCardDeckPosY	)
 		SetSpriteDepth ( CoverSheetCard, MAX_DEPTH_CARD )
 		SetSpriteVisible ( DealerSecondsCardShow,DealerSecondShowEnable)
 		SetSpriteVisible ( CoverSheetCard, Enable)
@@ -261,8 +260,7 @@ Function SetHoldPlayerCard ()
 		SetDrawDealerCard ()
 			
 	endwhile
-	
-	
+		
 	EndFunction
 
 Function SetDrawDealerCard ()
@@ -274,8 +272,8 @@ Function SetDrawDealerCard ()
 		
 	if DealerPlayer.Enable = 0 
 	
-		LDealerCardDeckPosX = DealerCardDeckPosX + ( MAX_DRAW_CARD_X_LENGH / 2 ) + 5
-		LDealerCardDeckPosY = DealerCardDeckPosY 
+		LDealerCardDeckPosX = Int_DealerCardDeckPosX + ( MAX_DRAW_CARD_X_LENGH / 2 ) + 5
+		LDealerCardDeckPosY = Int_DealerCardDeckPosY 
 	
 		DealerPlayer.CardPosX = DealerPlayer.CardPosX + ( MAX_DRAW_CARD_X_LENGH / 2 ) - 45
 		DealerPlayer.CardPosY = LDealerCardDeckPosY
@@ -307,15 +305,15 @@ Function SetDrawDealerCard ()
 	// Hole eine zufällige Karte vom Kartendeck
 	// lege es in Cache-Array ab
 	
-	PutFourCards [1] = CardsDeckRandom [1]
+	IntArray_GetFourCards [1] = IntArray_Mixed_Card [1]
 
 	// geholte Karte aus dem Karten Arrays löschen
 		
-	CardsDeckRandom.remove(1)
+	IntArray_Mixed_Card.remove(1)
 	
 	// Hole ID von der geholten Karte und Karte auf dem Bildschirm zeichnen
 	
-	LDealerCardID = ViewAndSetCardXY ( PutFourCards[1],  DealerPlayer.CardPosX, DealerPlayer.CardPosY)	
+	LDealerCardID = ViewAndSetCardXY ( IntArray_GetFourCards[1],  DealerPlayer.CardPosX, DealerPlayer.CardPosY)	
 	
 		
 	inc DrawCardNum	
@@ -323,17 +321,14 @@ Function SetDrawDealerCard ()
 	
 	SavePlayerDrawCardID [SPlayDrawCdIDCounter] = LDealerCardID
 		
-	
-	GSetDepthCard = GSetDepthCard - 1
-	SetSpriteDepth(LDealerCardID,GSetDepthCard)
+	Int_DepthCard = Int_DepthCard - 1
+	SetSpriteDepth(LDealerCardID,Int_DepthCard)
 	
 	DealerPlayer.Score =  DealerPlayer.Score + AddCard_V1 (1)
 				
-	GMaxCard = GMaxCard - 1
+	Int_MaxCard = Int_MaxCard - 1
 		
-	
 	EndFunction
-
 
 Function NewCardGame()
 	
@@ -341,11 +336,11 @@ Function NewCardGame()
 	
 		// Schalter für Spielende ausschalten
 	
-		CardGameOver	 =	0	
+		Bol_CardGameOver	 =	0	
 	
 		// Schalter		
 			
-		NewCardDeck [0] = 1
+		IntArray_NewCardDeck [0] = 1
 		
 			
 		// alle restlichen Karten entfernen / unsichtbar machen
@@ -383,8 +378,8 @@ Function NewCardGame()
 			
 			// Zieh - Kartenpostition X und Y zuruecksetzen
 			
-			XButton_Move = 0
-			YButton_Move = 0	
+			Int_XPosSetImage_Move = 0
+			Int_YPosSetImage_Move = 0	
 		
 			// Draw Card Counter to NULL
 			
@@ -403,8 +398,7 @@ Function NewCardGame()
 		
 			SetVirtualButtonActive (BUTTON_DRAW, 1)
 			SetVirtualButtonVisible (BUTTON_DRAW, 1)
-			
-			
+						
 			// "Hold" Button aktivieren	
 			
 			SetVirtualButtonActive (BUTTON_HOLD, 1)	
@@ -412,13 +406,14 @@ Function NewCardGame()
 			
 	EndFunction
 
-
 Function Draw_Four_Card ()
 
- for a = 1 to 4 
+local a as integer
+ 
+   for a = 1 to 4 
  	
- 	PutFourCards [a] = CardsDeckRandom [1]
- 	CardsDeckRandom.remove(1)
+ 	IntArray_GetFourCards [a] = IntArray_Mixed_Card [1]
+ 	IntArray_Mixed_Card.remove(1)
  	 	
  	next a    
 
@@ -426,8 +421,8 @@ EndFunction
 
 Function SetCardReset()
 
-XButton = ( MAX_WINDOW_SIZE_X / 2 ) - ( MAX_DRAW_CARD_X_LENGH / 2 ) + ( MAX_DRAW_CARD_X_LENGH / 2 ) 
-YButton = ( MAX_WINDOW_SIZE_Y / 2 ) - ( MAX_DRAW_CARD_Y_LENGH / 2 ) + ( MAX_DRAW_CARD_Y_LENGH / 2 ) 
+Int_XPosSetImage = ( MAX_WINDOW_SIZE_X / 2 ) - ( MAX_DRAW_CARD_X_LENGH / 2 ) + ( MAX_DRAW_CARD_X_LENGH / 2 ) 
+Int_YPosSetImage = ( MAX_WINDOW_SIZE_Y / 2 ) - ( MAX_DRAW_CARD_Y_LENGH / 2 ) + ( MAX_DRAW_CARD_Y_LENGH / 2 ) 
 
 EndFunction
 
@@ -442,16 +437,16 @@ Function AddCard_V1 (CardNumber as integer)
 
 	// Card As to 10
 	    
-    case (PutFourCards[CardNumber] >= 1 and PutFourCards[CardNumber] =< 10)
+    case (IntArray_GetFourCards[CardNumber] >= 1 and IntArray_GetFourCards[CardNumber] =< 10)
     
-    CardCounterSave = CardCounterSave  + PutFourCards[CardNumber]
+    CardCounterSave = CardCounterSave  + IntArray_GetFourCards[CardNumber]
     
     endcase
 
 	// Card J to K
 
 
-    case (PutFourCards[CardNumber] >= 11 and PutFourCards[CardNumber] =< 13)
+    case (IntArray_GetFourCards[CardNumber] >= 11 and IntArray_GetFourCards[CardNumber] =< 13)
     	
     CardCounterSave = CardCounterSave  + CardTentASJackKing
     
@@ -463,16 +458,15 @@ Function AddCard_V1 (CardNumber as integer)
 	// Checke Card 14 to 27
 	// Card As to 10
 
-
-	case (PutFourCards[CardNumber] >= 14 and PutFourCards[CardNumber] =< 23)
+	case (IntArray_GetFourCards[CardNumber] >= 14 and IntArray_GetFourCards[CardNumber] =< 23)
     	
-    CardCounterSave = CardCounterSave  +  ( PutFourCards[CardNumber] - 13)
+    CardCounterSave = CardCounterSave  +  ( IntArray_GetFourCards[CardNumber] - 13)
 
     endcase
 
 	// Card J to K
    
-    case (PutFourCards[CardNumber] >= 24 and PutFourCards[CardNumber] =< 26)
+    case (IntArray_GetFourCards[CardNumber] >= 24 and IntArray_GetFourCards[CardNumber] =< 26)
     	
     CardCounterSave = CardCounterSave  +  CardTentASJackKing
 
@@ -482,16 +476,15 @@ Function AddCard_V1 (CardNumber as integer)
 	// Checke Card 27 to 40
 	// Card As to 10
 
-
-	case (PutFourCards[CardNumber] >= 27 and PutFourCards[CardNumber] =< 36)
+	case (IntArray_GetFourCards[CardNumber] >= 27 and IntArray_GetFourCards[CardNumber] =< 36)
     	
-    CardCounterSave = CardCounterSave  +  ( PutFourCards[CardNumber] - 26)	
+    CardCounterSave = CardCounterSave  +  ( IntArray_GetFourCards[CardNumber] - 26)	
 
     endcase
 
 	// Card J to K
    
-    case (PutFourCards[CardNumber] >= 37 and (PutFourCards[CardNumber]) =< 39)
+    case (IntArray_GetFourCards[CardNumber] >= 37 and (IntArray_GetFourCards[CardNumber]) =< 39)
     	
     CardCounterSave = CardCounterSave  +  CardTentASJackKing
 
@@ -502,26 +495,24 @@ Function AddCard_V1 (CardNumber as integer)
 	// Card As to 10
 
 
-	case (PutFourCards[CardNumber] >= 40 and (PutFourCards[CardNumber]) =< 49)
+	case (IntArray_GetFourCards[CardNumber] >= 40 and (IntArray_GetFourCards[CardNumber]) =< 49)
     	
     
-    CardCounterSave = CardCounterSave  +  ( PutFourCards[CardNumber] - 39)	
+    CardCounterSave = CardCounterSave  +  ( IntArray_GetFourCards[CardNumber] - 39)	
 
     endcase
 
 	// Card J to K
    
-    case (PutFourCards[CardNumber] >= 50 and (PutFourCards[CardNumber]) =< 52)
+    case (IntArray_GetFourCards[CardNumber] >= 50 and (IntArray_GetFourCards[CardNumber]) =< 52)
     	
     CardCounterSave = CardCounterSave  +  CardTentASJackKing
 
     endcase
-    
-            
+                
 endselect 
 
 EndFunction CardCounterSave
-
 	
 	Function SetDrawPlayerCard ()
 	
@@ -529,23 +520,23 @@ EndFunction CardCounterSave
 	
 	if DrawCardNum > (MAX_SHOW_DRAW_CARD-1)
 		
-		Column_Enable = 1
+		Bol_ColumnEnable = 1
 		
-		YButton_Move = 0
-		XButton_Move = 0
+		Int_YPosSetImage_Move = 0
+		Int_XPosSetImage_Move = 0
 		DrawCardNum = 0
 		
 		SetCardReset()
 		
-		XButton = XButton - FIRSTCARDPOSX
+		Int_XPosSetImage = Int_XPosSetImage - FIRSTCARDPOSX
 		
 				
 	for Counter = 1 to MAX_SHOW_DRAW_CARD
 	
 		SetSpriteVisible(SavePlayerDrawCardID[(SPlayDrawCdIDCounter-Counter)+1],0)
 		
-		SetSpriteVisible(NewCardDeck[1], 0)
-		SetSpriteVisible(NewCardDeck[2], 0)
+		SetSpriteVisible(IntArray_NewCardDeck[1], 0)
+		SetSpriteVisible(IntArray_NewCardDeck[2], 0)
 		
 	next Counter
 		
@@ -558,35 +549,35 @@ EndFunction CardCounterSave
 	
 	if DrawCardNum = 1 
 		
-		if Column_Enable = 0
+		if Bol_ColumnEnable = 0
 		
-			YButton_Move = (SECCARDPOSY*2)			
+			Int_YPosSetImage_Move = (SECCARDPOSY*2)			
 		
 		endif
 			
 	else
 	
-		YButton_Move = YButton_Move + SECCARDPOSY
-		XButton_Move = XButton_Move + SECCARDPOSX
+		Int_YPosSetImage_Move = Int_YPosSetImage_Move + SECCARDPOSY
+		Int_XPosSetImage_Move = Int_XPosSetImage_Move + SECCARDPOSX
 	
 	endif
 
 																																																																																																																																						
-	PutFourCards [1] = CardsDeckRandom [1]
-	CardsDeckRandom.remove(1)
+	IntArray_GetFourCards [1] = IntArray_Mixed_Card [1]
+	IntArray_Mixed_Card.remove(1)
 		
-	PlayerCardID = ViewAndSetCardXY ( PutFourCards[1],  (XButton + XButton_Move), (YButton - YButton_Move))	
-	SavePlayerDrawCardID [SPlayDrawCdIDCounter] = PlayerCardID
+	Int_PlayerCardID = ViewAndSetCardXY ( IntArray_GetFourCards[1],  (Int_XPosSetImage + Int_XPosSetImage_Move), (Int_YPosSetImage - Int_YPosSetImage_Move))	
+	SavePlayerDrawCardID [SPlayDrawCdIDCounter] = Int_PlayerCardID
 			
 	
-	GSetDepthCard = GSetDepthCard - 1
+	Int_DepthCard = Int_DepthCard - 1
 		
-	SetSpriteDepth(PlayerCardID,GSetDepthCard)
+	SetSpriteDepth(Int_PlayerCardID,Int_DepthCard)
 		
 	
 	PlayerScore =  PlayerScore + AddCard_V1 (1)
 		
-	GMaxCard = GMaxCard - 1		
+	Int_MaxCard = Int_MaxCard - 1		
 		
 	EndFunction
 
@@ -604,24 +595,24 @@ Function SetDealerCard (CardEnable as integer )
 	XPosButton = ( MAX_WINDOW_SIZE_X / 2 ) - (MAX_DRAW_CARD_X_LENGH / 2 ) + (MAX_DRAW_CARD_X_LENGH / 2 )
 	YPosButton = ( MAX_WINDOW_SIZE_Y / 2 ) - (MAX_DRAW_CARD_Y_LENGH / 2 ) + (MAX_DRAW_CARD_Y_LENGH / 2 )
 	
-	DealerFirstCardShow	= 	ViewAndSetCardXY ( PutFourCards[1],  XPosButton - XPosxExtra, YPosButton - YPosxExtra) 
-	SetSpriteDepth ( DealerFirstCardShow, GSetDepthCard )
-	GSetDepthCard	=	( MAX_DEPTH_CARD  - 	2 )
+	DealerFirstCardShow	= 	ViewAndSetCardXY ( IntArray_GetFourCards[1],  XPosButton - XPosxExtra, YPosButton - YPosxExtra) 
+	SetSpriteDepth ( DealerFirstCardShow, Int_DepthCard )
+	Int_DepthCard	=	( MAX_DEPTH_CARD  - 	2 )
 	
 	DealerPlayer.Score = DealerPlayer.Score + AddCard_V1(1) 
 	
-	DealerSecondsCardShow	=	ViewAndSetCardXY ( PutFourCards[3],  XPosButton, YPosButton - YPosxExtra) 
-	SetSpriteDepth ( DealerSecondsCardShow, GSetDepthCard )
-	GSetDepthCard	=	(MAX_DEPTH_CARD  - 	1)
+	DealerSecondsCardShow	=	ViewAndSetCardXY ( IntArray_GetFourCards[3],  XPosButton, YPosButton - YPosxExtra) 
+	SetSpriteDepth ( DealerSecondsCardShow, Int_DepthCard )
+	Int_DepthCard	=	(MAX_DEPTH_CARD  - 	1)
 	
 	// Variablen für Funktionausgabe
 	
-	DealerCardDeckPosX = XPosButton
-	DealerCardDeckPosY = YPosButton - YPosxExtra
+	Int_DealerCardDeckPosX = XPosButton
+	Int_DealerCardDeckPosY = YPosButton - YPosxExtra
 			
 	// Kartenzaehler zwei Abziehen
 	
-	GMaxCard = GMaxCard - 2 
+	Int_MaxCard = Int_MaxCard - 2 
 	
 	// Zweite Karte von Dealer decken
 	
@@ -641,50 +632,50 @@ Function SetPlayerCard ()
 		// Sonst werden die neuen Karten von den alten überdeckt,
 		// so, daß man die neuen gewählten Karten nicht sehen kann
 		
-		if NewCardDeck[0] = 1  // falls neue Kartendeck Button gedrückt wurde
+		if IntArray_NewCardDeck[0] = 1  // falls neue Kartendeck Button gedrückt wurde
 			
-			SetSpriteVisible(NewCardDeck[1],0)
-			SetSpriteVisible(NewCardDeck[2],0)
+			SetSpriteVisible(IntArray_NewCardDeck[1],0)
+			SetSpriteVisible(IntArray_NewCardDeck[2],0)
 			
 		endif
 	
-	FirstCardShow		=	ViewAndSetCardXY ( PutFourCards[2],  XButton-FIRSTCARDPOSX, YButton) 	
-	GSetDepthCard		=	( MAX_DEPTH_CARD  - 	3 )
-	SetSpriteDepth ( FirstCardShow, GSetDepthCard )
+	FirstCardShow		=	ViewAndSetCardXY ( IntArray_GetFourCards[2],  Int_XPosSetImage-FIRSTCARDPOSX, Int_YPosSetImage) 	
+	Int_DepthCard		=	( MAX_DEPTH_CARD  - 	3 )
+	SetSpriteDepth ( FirstCardShow, Int_DepthCard )
 	
-	SecondCardShow		=	ViewAndSetCardXY ( PutFourCards[4],  XButton-SECCARDPOSX, YButton - SECCARDPOSY) 
-	GSetDepthCard		=	(MAX_DEPTH_CARD  - 	4 )
-	SetSpriteDepth ( SecondCardShow, GSetDepthCard )
+	SecondCardShow		=	ViewAndSetCardXY ( IntArray_GetFourCards[4],  Int_XPosSetImage-SECCARDPOSX, Int_YPosSetImage - SECCARDPOSY) 
+	Int_DepthCard		=	(MAX_DEPTH_CARD  - 	4 )
+	SetSpriteDepth ( SecondCardShow, Int_DepthCard )
 			
 	// Kontrollflags für Button "neue Kartendeck"
 	// als nicht gedrückt setzen
 	
-	NewCardDeck[0] = 0 
+	IntArray_NewCardDeck[0] = 0 
 	
 	// Die beiden Kartendeck für Spieler merken
 	
-	NewCardDeck[2] = SecondCardShow
-	NewCardDeck[1] = FirstCardShow
+	IntArray_NewCardDeck[2] = SecondCardShow
+	IntArray_NewCardDeck[1] = FirstCardShow
 
 	PlayerScore =  PlayerScore + AddCard_V1 (2)
 	PlayerScore =  PlayerScore + AddCard_V1 (4)
 	
 	// Kartenzaehler zwei Abziehen
 	
-	GMaxCard = GMaxCard - 2
+	Int_MaxCard = Int_MaxCard - 2
 
 EndFunction
 
 Function MakeButton ()
 
-AddVirtualButton(BUTTON_DRAW, XButton - 50, YButton + 175, 75)
-AddVirtualButton(BUTTON_HOLD, XButton + 50, YButton + 175, 75)
+AddVirtualButton(BUTTON_DRAW, Int_XPosSetImage - 50, Int_YPosSetImage + 175, 75)
+AddVirtualButton(BUTTON_HOLD, Int_XPosSetImage + 50, Int_YPosSetImage + 175, 75)
 AddVirtualButton(BUTTON_EXIT, MAX_WINDOW_SIZE_X-80, MAX_WINDOW_SIZE_Y-80, 75)
 
-AddVirtualButton(BUTTON_NEW_CARD, XButton, YButton + 250, 0)
+AddVirtualButton(BUTTON_NEW_CARD, Int_XPosSetImage, Int_YPosSetImage + 250, 0)
 SetVirtualButtonSize(BUTTON_NEW_CARD, 150,50)
 
-AddVirtualButton(BUTTON_NEW_GAME, XButton, YButton + 325, 0)
+AddVirtualButton(BUTTON_NEW_GAME, Int_XPosSetImage, Int_YPosSetImage + 325, 0)
 SetVirtualButtonSize(BUTTON_NEW_GAME, 150,50)
 
 AddVirtualButton(BUTTON_DEALER, MAX_WINDOW_SIZE_X-160, MAX_WINDOW_SIZE_Y-80, 75)
@@ -701,30 +692,32 @@ EndFunction
 
 Function ShuffleCards ()
 	
-	local n 		as integer
-	local element1	as integer
-	local element2	as integer
-	local tempNumber	as integer
+// Global Array - Variabale: 
 	
-	For n = 1 to 52
+	local L_a 			as integer
+	local L_element1		as integer
+	local L_element2		as integer
+	local L_tempNumber	as integer
+	
+	For L_a = 1 to 52
     
-    	CardsDeckRandom[n] = n
+    	IntArray_Mixed_Card[L_a] = L_a
     	
-    Next n
+    Next L_a
  
 // Shuffle the numbers.
 
-	For n = 1 to 52
+	For L_a = 1 to 52
 
-    	element1 = Random(1, 52)
-    	element2 = Random(1, 52)
+    	L_element1 = Random(1, 52)
+    	L_element2 = Random(1, 52)
     
-    	tempNumber = CardsDeckRandom[element1]
+    	L_tempNumber = IntArray_Mixed_Card[L_element1]
     
-    	CardsDeckRandom[element1] = CardsDeckRandom[element2]
-    	CardsDeckRandom[element2] = tempNumber
+    	IntArray_Mixed_Card[L_element1] = IntArray_Mixed_Card[L_element2]
+    	IntArray_Mixed_Card[L_element2] = L_tempNumber
 
-	Next n
+	Next L_a
 	
 
 endfunction
@@ -753,8 +746,8 @@ SetSpriteVisible(SPR_CardsDeckFT[CardNum],1)
 
 else
 
-	Zahltreffer = "Error Code: " + str(CardResult)
-	Message(Zahltreffer + " [Program abort]")
+	Str_Messages = "Error Code: " + str(CardResult)
+	Message(Str_Messages + " [Program abort]")
 	end  // Program abort
 
 endif
@@ -774,8 +767,10 @@ EndFunction
 
 Function FillCardToSprite ()
 
-for a = 1 to 52
+local a as integer
 
+
+for a = 1 to 52
 
 SPR_CardsDeckFT[a] = CreateSprite (ID_CardsDeckFT[a])
 SetSpriteVisible(SPR_CardsDeckFT[a],0)
@@ -786,11 +781,12 @@ endfunction
 
 Function FillCardTable ()
 	
-	local a, b, c as integer
+	local a as integer
+	local b as integer
+	local c as integer
 	
 	b = 12
 	c = 220 + 20
-
 
 for a = 0 to 3
 	
@@ -833,7 +829,7 @@ for a = 0 to 12
 		next a	
 	
 	
-	endfunction
+EndFunction
 
 Function PutCardPosXY ()
 	
@@ -847,7 +843,7 @@ for SLoopZaehler = 1 to SLoop
 		
 	if (SLoopZaehler >= 1) and (SLoopZaehler <= 13)
 		
-		ID_CardsDeckFT[SLoopZaehler] = CopyImage(backdrop0, CardsDeckFT[SetCardPosXY],CardsDeckFT[14], MAX_DRAW_CARD_X_LENGH,MAX_DRAW_CARD_Y_LENGH)
+		ID_CardsDeckFT[SLoopZaehler] = CopyImage(Int_CardImage, CardsDeckFT[SetCardPosXY],CardsDeckFT[14], MAX_DRAW_CARD_X_LENGH,MAX_DRAW_CARD_Y_LENGH)
 		
 		// Zahltreffer = "between 1 and 13"	
 	
@@ -856,7 +852,7 @@ for SLoopZaehler = 1 to SLoop
 	if (SLoopZaehler > 13) and (SLoopZaehler <= 26)
 		
 		SetCardPosXY=SLoopZaehler-13
-		ID_CardsDeckFT[SLoopZaehler] = CopyImage(backdrop0, CardsDeckFT[SetCardPosXY],CardsDeckFT[15], MAX_DRAW_CARD_X_LENGH,MAX_DRAW_CARD_Y_LENGH)
+		ID_CardsDeckFT[SLoopZaehler] = CopyImage(Int_CardImage, CardsDeckFT[SetCardPosXY],CardsDeckFT[15], MAX_DRAW_CARD_X_LENGH,MAX_DRAW_CARD_Y_LENGH)
 	
 		// Zahltreffer = "between 14 and 26"
 	
@@ -865,7 +861,7 @@ for SLoopZaehler = 1 to SLoop
 	if (SLoopZaehler > 26) and (SLoopZaehler <= 39)
 		
 		SetCardPosXY=SLoopZaehler-26
-		ID_CardsDeckFT[SLoopZaehler] = CopyImage(backdrop0, CardsDeckFT[SetCardPosXY],CardsDeckFT[16], MAX_DRAW_CARD_X_LENGH,MAX_DRAW_CARD_Y_LENGH)
+		ID_CardsDeckFT[SLoopZaehler] = CopyImage(Int_CardImage, CardsDeckFT[SetCardPosXY],CardsDeckFT[16], MAX_DRAW_CARD_X_LENGH,MAX_DRAW_CARD_Y_LENGH)
 		
 		// Zahltreffer = "between 27 and 39"
 	
@@ -874,7 +870,7 @@ for SLoopZaehler = 1 to SLoop
 	if (SLoopZaehler > 39) and (SLoopZaehler <= 52)
 		
 		SetCardPosXY=SLoopZaehler-39
-		ID_CardsDeckFT[SLoopZaehler] = CopyImage(backdrop0, CardsDeckFT[SetCardPosXY],CardsDeckFT[17], MAX_DRAW_CARD_X_LENGH,MAX_DRAW_CARD_Y_LENGH)
+		ID_CardsDeckFT[SLoopZaehler] = CopyImage(Int_CardImage, CardsDeckFT[SetCardPosXY],CardsDeckFT[17], MAX_DRAW_CARD_X_LENGH,MAX_DRAW_CARD_Y_LENGH)
 		
 		// Zahltreffer = "between 40 and 52"
 	
@@ -903,21 +899,14 @@ Function SetWindowsDeviceProperty ()
 	
 	EndFunction
 
-Function NULL ()
-
-
-EndFunction
-
 Function SetConstant ()
-
 			
 	#constant BUTTON_DRAW			=	1
 	#constant BUTTON_HOLD			=	2
 	#constant BUTTON_EXIT			=	3
 	#constant BUTTON_NEW_CARD		=	4
 	#constant BUTTON_NEW_GAME		=	5	
-	#constant BUTTON_DEALER		=	6	
-	
+	#constant BUTTON_DEALER			=	6		
 	
 	#constant MAX_SHOW_DRAW_CARD		=	4
 	
@@ -942,70 +931,101 @@ Function SetConstant ()
 Function SetVariable ()
 	
 	#option_explicit
+		
+	// * * * Type * * *
 	
-	global DealerPlayer				as	_Dealer
-					
-	global DealerCardDeckPosX		as 	integer	=	0
-	global DealerCardDeckPosY		as 	integer	=	0
+	global DealerPlayer			as	_Gamer	
+		
+	// * * * Integer Variablen
 	
+	global Int_CardImage			as 	integer	= 	0	// Index für Bilddatei einer Karten
+	global Int_MaxCard			as 	integer = 	52 	// Maxmimaler Karten von Deck genommen?
+	
+	// Jede Karte erählt eine Ebene (Hintergrund) - Index
+	
+	global Int_DepthCard			as	integer	=	MAX_DEPTH_CARD 
+	
+	global Int_XPosSetImage		as 	integer
+	global Int_YPosSetImage 		as 	integer
+	
+	global Int_XPosSetImage_Move	as	integer	=	0
+	global Int_YPosSetImage_Move	as	integer	= 	0
+	
+	// Jede Karte einer Player hat eine eigene ID (Index)
+	
+	global Int_PlayerCardID		as	integer	=	0
+	
+	// Zeichne / Positioniere Kartenfür Dealer auf dem Bildschirm
+	
+	global Int_DealerCardDeckPosX as 	integer	=	0
+	global Int_DealerCardDeckPosY as 	integer	=	0
+	
+	// * * * Arrays - Variablen * * *
+	
+	global IntArray_NewCardDeck	as 	integer [3]	= [0] // Flags und Index für Karten ziehen für Player
+	global IntArray_GetFourCards	as 	integer [4] 	// Felder für 4 gezogene Karten vom Kartendeck
+	global IntArray_Mixed_Card	as 	integer [54]	// Felder für gemischte Karten
+	
+	// * * * String Variablen * * *
+	
+	global Str_Messages 				as 	string 		// Allgemeine Meldungen
+	
+	// * * *  Boolean - Variablen / Kontrollflags * * *
+	
+	// Karten werden etwas Nebeneinander auf dem Schirm gezeigt
+	
+	global Bol_ColumnEnable			as	integer 	= 	0	
+	
+	// Flagcontroll für SpielEnde (1 =  Spielende)
+	
+	global Bol_CardGameOver			as 	integer 	= 	0
+	
+		// * * * //
+		
 	global DealerFirstCardShow		as 	integer 	= 	0		
-	global DealerSecondsCardShow		as 	integer	=	0		
+	global DealerSecondsCardShow		as 	integer		=	0		
 		
 	global SPlayDrawCdIDCounter		as 	integer 	= 	0
 	global SavePlayerDrawCardID		as 	integer [53]
-	
-	global NewCardDeck				as 	integer [3] = [0,0,0]
-	
-	// Punkte für Player und Dealer
+		
+	// Punkte für Player
 		
 	global PlayerScore				as 	integer 	= 	0
-	
-	// Maxmimaler Karten von Deck genommen?
-	
-	global GMaxCard					as 	integer 	= 	52
-			
-	global backdrop0 					as 	integer 	= 	0
+		
 	global ID_CardsDeckFT 			as 	integer [52]
-	
 	global SPR_CardsDeckFT 			as 	integer [52]
-	global CardsDeckRandom 			as 	integer [54]
 	
 	global CardsDeckFT 				as 	integer [17]
+	
 	global CardsDeckX 				as 	integer [12]
 	global CardsDeckY 				as 	integer [3]
 	
-	global Zahltreffer 				as 	string
-	global a,b,c 					as 	integer
-	global CardsErrorCode 			as 	integer
-	
+			
 	global CoverSheet 				as 	integer
 	global CoverSheetCard 			as 	integer
 		
-	global PutFourCards 				as 	integer [4]
-	
-	global XButton 					as 	integer
-	global YButton 					as 	integer
-	
 	global DrawCardNum				as	integer	=	0
 	global Push_DrawCardNum			as 	integer	=	0
 	
 	global BackupNum					as	integer	=	0
+			
+	global Max_DrawCardNum 			as 	integer = 	0	
 	
-	global XButton_Move				as	integer	=	0
-	global YButton_Move 				as	integer	= 	0
-	
-	global PlayerCardID				as	integer	=	0
-	global GSetDepthCard				as	integer	=	MAX_DEPTH_CARD
-	
-	global Max_DrawCardNum 			as 	integer = 	0
-		
-	// Boolean - Werte / Kontrollflags
-	
-	global Column_Enable				as	integer 	= 	0
-	global DeckButtonBoolean 			as 	integer 	= 	1
-	
-	global CardGameOver 				as 	integer 	= 	0
-	
+EndFunction
 
+
+SetTypes:
 	
-endfunction
+	Type _Gamer		
+		
+		Enable		 		as integer
+		Score				as integer
+		
+		CardPosX				as integer
+		CardPosY				as integer
+		
+		CardID				as integer
+		
+		EndType
+	
+Return
